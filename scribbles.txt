@@ -1,0 +1,9 @@
+mjmxxfikiuvjfjljbhcy
+
+
+https://deno.land/x/serialize_javascript@v1.0.1
+
+supabase functions new geographix_vector_log
+
+
+supabase functions deploy geographix_vector_log --project-ref mjmxxfikiuvjfjljbhcy

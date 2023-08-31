@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "serialize": "https://deno.land/x/serialize_javascript/mod.ts"
+  }
+}
