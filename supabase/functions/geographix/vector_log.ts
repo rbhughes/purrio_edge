@@ -1,11 +1,9 @@
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
-
 const defineSQL = (filter) => {
+  filter = filter ? filter : "";
 
-  filter = filter ? filter : ''
-
-  const where = filter.trim().length === 0 ? '' : `WHERE ${filter}`
+  const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
 
   let select = `SELECT * FROM (
     WITH 
@@ -98,19 +96,17 @@ const defineSQL = (filter) => {
 
   const order = `ORDER BY w_uwi, wc_curveset, wc_curvename, wc_version`;
 
-  const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`
+  const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
 
-  const fast_count = `SELECT COUNT(DISTINCT wellid) AS count FROM gx_well_curve`;
-
+  //const fast_count = `SELECT COUNT(DISTINCT wellid) AS count FROM gx_well_curve`;
 
   return {
     select: select,
     count: count,
     order: order,
-    where: where
+    where: where,
   };
 };
-
 
 const xformer = (args) => {
   let { func, key, arg, obj } = args;
@@ -150,46 +146,37 @@ const xformer = (args) => {
   }
 };
 
-
 const xforms = {
-  wcv_curve_values: 'decode_curve_values',
-  wcv_curve_values_orig: 'blob_to_string'
-}
-
+  wcv_curve_values: "decode_curve_values",
+  wcv_curve_values_orig: "blob_to_string",
+};
 
 const prefixes = {
-  "w_": "well",
-  "wc_": "gx_well_curve",
-  "wcs_": "gx_well_curveset",
-  "wcv_": "gx_well_curve_values"
-}
+  w_: "well",
+  wc_: "gx_well_curve",
+  wcs_: "gx_well_curveset",
+  wcv_: "gx_well_curve_values",
+};
 
+const global_id_keys = ["w_uwi", "wc_curveset", "wc_curvename", "wc_version"];
 
-const global_id_keys = ['w_uwi', 'wc_curveset', 'wc_curvename', 'wc_version']
+const well_id_keys = ["w_uwi"];
 
+const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
 
-const well_id_keys = ['w_uwi']
-
-
-const pg_cols = ['id', 'repo_id', 'well_id', 'geo_type', 'tag', 'doc']
-
-
-const default_chunk = 1000;
-
+const default_chunk = 5000;
 
 ///////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
-    sql: defineSQL(filter),
-    serialized_xformer: serialize(xformer),
-    xforms: xforms,
-    prefixes: prefixes,
+    default_chunk: default_chunk,
     global_id_keys: global_id_keys,
-    well_id_keys: well_id_keys,
     pg_cols: pg_cols,
-    default_chunk: default_chunk
-  }
+    prefixes: prefixes,
+    serialized_xformer: serialize(xformer),
+    sql: defineSQL(filter),
+    well_id_keys: well_id_keys,
+    xforms: xforms,
+  };
 };
-
-

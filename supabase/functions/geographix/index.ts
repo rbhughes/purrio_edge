@@ -2,38 +2,35 @@
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-import { getAssetDNA as vector_log_dna } from './vector_log.ts'
-import { getAssetDNA as well_dna } from './vector_log.ts'
- 
+import { getAssetDNA as completion_dna } from "./completion.ts";
+import { getAssetDNA as dst_dna } from "./dst.ts";
+import { getAssetDNA as vector_log_dna } from "./vector_log.ts";
+import { getAssetDNA as well_dna } from "./well.ts";
 
 const vault = {
+  completion: completion_dna,
+  dst: dst_dna,
   vector_log: vector_log_dna,
-  well: well_dna
-}
+  well: well_dna,
+};
 
 serve(async (req) => {
-  let { asset, filter } = await req.json()
+  let { asset, filter } = await req.json();
 
   //const data = {
   //  message: `Hello ${asset}!`,
   //}
-  
-  const getDNA = vault[asset]
 
-  const data = getDNA(filter)
+  const getDNA = vault[asset];
 
-  
+  const data = getDNA(filter);
 
-
-  
-
-  return new Response(
-    JSON.stringify(data),
-    { headers: { "Content-Type": "application/json" } },
-  )
-})
+  return new Response(JSON.stringify(data), {
+    headers: { "Content-Type": "application/json" },
+  });
+});
 
 // To invoke:
 // curl -i --location --request POST 'http://localhost:54321/functions/v1/' \
