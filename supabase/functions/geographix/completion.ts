@@ -108,7 +108,36 @@ const defineSQL = (filter) => {
 };
 
 const xformer = (args) => {
-  let { func, key, arg, obj } = args;
+  let { func, key, typ, arg, obj } = args;
+
+  const ensureType = (type: string, val: any) => {
+    if (val == null) {
+      return null;
+    } else if (type === "object") {
+      console.log("UNEXPECTED OBJECT TYPE! (needs xformer)", type);
+      console.log(val);
+      return null;
+    } else if (type === "string") {
+      //return decodeWin1252(val)
+      return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+    } else if (type === "number") {
+      // cuz blank strings (\t\r\n) evaluate to 0
+      if (val.toString().replace(/\s/g, "") === "") {
+        return null;
+      }
+      let n = Number(val);
+      return isNaN(n) ? null : n;
+    } else if (type === "date") {
+      try {
+        return new Date(val).toISOString();
+      } catch (error) {
+        return null;
+      }
+    } else {
+      console.log("ENSURE TYPE SOMETHING ELSE (xformer)", type);
+      return "XFORM ME";
+    }
+  };
 
   const D = "|&|";
   const N = "purrNULL";
@@ -121,57 +150,249 @@ const xformer = (args) => {
     case "delimited_array_with_nulls":
       return (() => {
         try {
-          return obj[key].split(D).map((v) => (v === N ? null : v));
+          return obj[key]
+            .split(D)
+            .map((v) => (v === N ? null : ensureType(typ, v)));
         } catch (error) {
           console.log("ERROR", error);
           return;
         }
       })();
     default:
-      console.warn("UNEXPECTED TRANSFORM FUNC: " + func);
-      return obj[key];
+      return ensureType(typ, obj[key]);
   }
 };
 
 const xforms = {
-  c_base_depth: "delimited_array_with_nulls",
-  c_base_form: "delimited_array_with_nulls",
-  c_completion_date: "delimited_array_with_nulls",
-  c_completion_form: "delimited_array_with_nulls",
-  c_completion_obs_no: "delimited_array_with_nulls",
-  c_completion_type: "delimited_array_with_nulls",
-  c_remark: "delimited_array_with_nulls",
-  c_row_changed_date: "delimited_array_with_nulls",
-  c_source: "delimited_array_with_nulls",
-  c_top_depth: "delimited_array_with_nulls",
-  c_top_form: "delimited_array_with_nulls",
-  c_uwi: "delimited_array_with_nulls",
-  p_base_depth: "delimited_array_with_nulls",
-  p_base_form: "delimited_array_with_nulls",
-  p_cluster: "delimited_array_with_nulls",
-  p_completion_obs_no: "delimited_array_with_nulls",
-  p_completion_source: "delimited_array_with_nulls",
-  p_current_status: "delimited_array_with_nulls",
-  p_gx_base_form_alias: "delimited_array_with_nulls",
-  p_gx_top_form_alias: "delimited_array_with_nulls",
-  p_gx_top_form_alias: "delimited_array_with_nulls",
-  p_perforation_angle: "delimited_array_with_nulls",
-  p_perforation_count: "delimited_array_with_nulls",
-  p_perforation_date: "delimited_array_with_nulls",
-  p_perforation_density: "delimited_array_with_nulls",
-  p_perforation_diameter: "delimited_array_with_nulls",
-  p_perforation_diameter_ouom: "delimited_array_with_nulls",
-  p_perforation_obs_no: "delimited_array_with_nulls",
-  p_perforation_per_uom: "delimited_array_with_nulls",
-  p_perforation_phase: "delimited_array_with_nulls",
-  p_perforation_type: "delimited_array_with_nulls",
-  p_remark: "delimited_array_with_nulls",
-  p_row_changed_date: "delimited_array_with_nulls",
-  p_source: "delimited_array_with_nulls",
-  p_stage: "delimited_array_with_nulls",
-  p_top_depth: "delimited_array_with_nulls",
-  p_top_form: "delimited_array_with_nulls",
-  p_uwi: "delimited_array_with_nulls",
+  // WELL
+
+  w_uwi: {
+    ts_type: "string",
+  },
+  w_assigned_field: {
+    ts_type: "string",
+  },
+  w_common_well_name: {
+    ts_type: "string",
+  },
+  w_completion_date: {
+    ts_type: "date",
+  },
+  w_country: {
+    ts_type: "string",
+  },
+  w_county: {
+    ts_type: "string",
+  },
+  w_current_class: {
+    ts_type: "string",
+  },
+  w_current_status: {
+    ts_type: "string",
+  },
+  w_depth_datum: {
+    ts_type: "number",
+  },
+  w_final_td: {
+    ts_type: "number",
+  },
+  w_ground_elev: {
+    ts_type: "number",
+  },
+  w_kb_elev: {
+    ts_type: "number",
+  },
+  w_lease_name: {
+    ts_type: "string",
+  },
+  w_operator: {
+    ts_type: "string",
+  },
+  w_province_state: {
+    ts_type: "string",
+  },
+  w_row_changed_date: {
+    ts_type: "date",
+  },
+  w_spud_date: {
+    ts_type: "date",
+  },
+  w_surface_latitude: {
+    ts_type: "number",
+  },
+  w_surface_longitude: {
+    ts_type: "number",
+  },
+  w_td_form: {
+    ts_type: "string",
+  },
+  w_well_name: {
+    ts_type: "string",
+  },
+  w_well_number: {
+    ts_type: "string",
+  },
+
+  // WELL_COMPLETION
+
+  id_c_uwi: {
+    ts_type: "string",
+  },
+  c_base_depth: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_base_form: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_completion_date: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_completion_form: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_completion_obs_no: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_completion_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_remark: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_row_changed_date: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_source: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_top_depth: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_top_form: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_uwi: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+
+  // WELL_PERFORATION
+
+  id_p_uwi: {
+    ts_type: "string",
+  },
+
+  p_base_depth: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_base_form: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_cluster: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_completion_obs_no: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_completion_source: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_current_status: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_gx_base_form_alias: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_gx_top_form_alias: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_perforation_angle: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_perforation_count: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_perforation_date: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_perforation_density: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_perforation_diameter: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_perforation_diameter_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_perforation_obs_no: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_perforation_per_uom: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_perforation_phase: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_perforation_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_remark: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_row_changed_date: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_source: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_stage: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_top_depth: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_top_form: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_uwi: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
 };
 
 const prefixes = {

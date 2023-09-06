@@ -177,14 +177,43 @@ const defineSQL = (filter) => {
 };
 
 const xformer = (args) => {
-  let { func, key, arg, obj } = args;
+  let { func, key, typ, arg, obj } = args;
+
+  const ensureType = (type: string, val: any) => {
+    if (val == null) {
+      return null;
+    } else if (type === "object") {
+      console.log("UNEXPECTED OBJECT TYPE! (needs xformer)", type);
+      console.log(val);
+      return null;
+    } else if (type === "string") {
+      //return decodeWin1252(val)
+      return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+    } else if (type === "number") {
+      // cuz blank strings (\t\r\n) evaluate to 0
+      if (val.toString().replace(/\s/g, "") === "") {
+        return null;
+      }
+      let n = Number(val);
+      return isNaN(n) ? null : n;
+    } else if (type === "date") {
+      try {
+        return new Date(val).toISOString();
+      } catch (error) {
+        return null;
+      }
+    } else {
+      console.log("ENSURE TYPE SOMETHING ELSE (xformer)", type);
+      return "XFORM ME";
+    }
+  };
 
   if (obj[key] == null) {
     return null;
   }
 
   switch (func) {
-    case "blob_to_string":
+    case "blob_to_hex":
       return (() => {
         try {
           return Buffer.from(obj[key]).toString("hex");
@@ -194,13 +223,446 @@ const xformer = (args) => {
         }
       })();
     default:
-      console.warn("UNEXPECTED TRANSFORM FUNC: " + func);
-      return obj[key];
+      return ensureType(typ, obj[key]);
   }
 };
 
 const xforms = {
-  w_gx_dev_well_blob: "blob_to_string",
+  w_abandonment_date: {
+    ts_type: "date",
+  },
+  w_assigned_field: {
+    ts_type: "string",
+  },
+  w_base_node_id: {
+    ts_type: "string",
+  },
+  w_bottom_hole_latitude: {
+    ts_type: "number",
+  },
+  w_bottom_hole_longitude: {
+    ts_type: "number",
+  },
+  w_casing_flange_elev: {
+    ts_type: "number",
+  },
+  w_casing_flange_elev_ouom: {
+    ts_type: "string",
+  },
+  w_common_well_name: {
+    ts_type: "string",
+  },
+  w_completion_date: {
+    ts_type: "date",
+  },
+  w_confidential_date: {
+    ts_type: "date",
+  },
+  w_confidential_depth: {
+    ts_type: "number",
+  },
+  w_confidential_depth_ouom: {
+    ts_type: "string",
+  },
+  w_confidential_form: {
+    ts_type: "string",
+  },
+  w_confidential_type: {
+    ts_type: "string",
+  },
+  w_country: {
+    ts_type: "string",
+  },
+  w_county: {
+    ts_type: "string",
+  },
+  w_current_class: {
+    ts_type: "string",
+  },
+  w_current_status: {
+    ts_type: "string",
+  },
+  w_current_status_date: {
+    ts_type: "date",
+  },
+  w_depth_datum: {
+    ts_type: "string",
+  },
+  w_depth_datum_elev: {
+    ts_type: "number",
+  },
+  w_depth_datum_elev_ouom: {
+    ts_type: "string",
+  },
+  w_discovery_ind: {
+    ts_type: "string",
+  },
+  w_district: {
+    ts_type: "string",
+  },
+  w_drill_td: {
+    ts_type: "number",
+  },
+  w_drill_td_ouom: {
+    ts_type: "string",
+  },
+  w_faulted_ind: {
+    ts_type: "string",
+  },
+  w_final_drill_date: {
+    ts_type: "date",
+  },
+  w_final_td: {
+    ts_type: "number",
+  },
+  w_final_td_ouom: {
+    ts_type: "string",
+  },
+  w_geodetic_datum_id: {
+    ts_type: "string",
+  },
+  w_geographic_region: {
+    ts_type: "string",
+  },
+  w_geologic_province: {
+    ts_type: "string",
+  },
+  w_ggx_internal_status: {
+    ts_type: "string",
+  },
+  w_ground_elev: {
+    ts_type: "number",
+  },
+  w_ground_elev_ouom: {
+    ts_type: "string",
+  },
+  w_ground_elev_type: {
+    ts_type: "string",
+  },
+  w_gx_alternate_id: {
+    ts_type: "string",
+  },
+  w_gx_bottom_hole_ew_direction: {
+    ts_type: "string",
+  },
+  w_gx_bottom_hole_ns_direction: {
+    ts_type: "string",
+  },
+  w_gx_bottom_hole_tvd: {
+    ts_type: "number",
+  },
+  w_gx_bottom_hole_x_offset: {
+    ts_type: "number",
+  },
+  w_gx_bottom_hole_y_offset: {
+    ts_type: "number",
+  },
+  w_gx_dev_well_blob: {
+    ts_type: "string",
+    xform: "blob_to_hex",
+  },
+  w_gx_formid: {
+    ts_type: "string",
+  },
+  w_gx_formid_alias: {
+    ts_type: "string",
+  },
+  w_gx_legal_string: {
+    ts_type: "string",
+  },
+  w_gx_location_string: {
+    ts_type: "string",
+  },
+  w_gx_mag_declination: {
+    ts_type: "number",
+  },
+  w_gx_old_id: {
+    ts_type: "string",
+  },
+  w_gx_oldest_form_alias: {
+    ts_type: "string",
+  },
+  w_gx_original_units: {
+    ts_type: "string",
+  },
+  w_gx_percent_allocation: {
+    ts_type: "number",
+  },
+  w_gx_permit_date: {
+    ts_type: "date",
+  },
+  w_gx_point: {
+    ts_type: "string",
+  },
+  w_gx_proposed_flag: {
+    ts_type: "number",
+  },
+  w_gx_remarks: {
+    ts_type: "string",
+  },
+  w_gx_rigfloor_elev: {
+    ts_type: "number",
+  },
+  w_gx_td_form_alias: {
+    ts_type: "string",
+  },
+  w_gx_user1: {
+    ts_type: "string",
+  },
+  w_gx_user2: {
+    ts_type: "string",
+  },
+  w_gx_user_date: {
+    ts_type: "date",
+  },
+  w_gx_wsn: {
+    ts_type: "number",
+  },
+  w_initial_class: {
+    ts_type: "string",
+  },
+  w_kb_elev: {
+    ts_type: "number",
+  },
+  w_kb_elev_ouom: {
+    ts_type: "string",
+  },
+  w_lease_name: {
+    ts_type: "string",
+  },
+  w_lease_number: {
+    ts_type: "string",
+  },
+  w_legal_survey_type: {
+    ts_type: "string",
+  },
+  w_log_td: {
+    ts_type: "number",
+  },
+  w_log_td_ouom: {
+    ts_type: "string",
+  },
+  w_max_tvd: {
+    ts_type: "number",
+  },
+  w_max_tvd_ouom: {
+    ts_type: "string",
+  },
+  w_net_pay: {
+    ts_type: "number",
+  },
+  w_net_pay_ouom: {
+    ts_type: "string",
+  },
+  w_oldest_form: {
+    ts_type: "string",
+  },
+  w_oldest_form_age: {
+    ts_type: "string",
+  },
+  w_operator: {
+    ts_type: "string",
+  },
+  w_original_operator: {
+    ts_type: "string",
+  },
+  w_parent_relationship_type: {
+    ts_type: "string",
+  },
+  w_parent_uwi: {
+    ts_type: "string",
+  },
+  w_platform_id: {
+    ts_type: "string",
+  },
+  w_platform_source: {
+    ts_type: "string",
+  },
+  w_plot_name: {
+    ts_type: "string",
+  },
+  w_plot_symbol: {
+    ts_type: "string",
+  },
+  w_plugback_depth: {
+    ts_type: "number",
+  },
+  w_plugback_depth_ouom: {
+    ts_type: "string",
+  },
+  w_primary_source: {
+    ts_type: "string",
+  },
+  w_profile_type: {
+    ts_type: "string",
+  },
+  w_province_state: {
+    ts_type: "string",
+  },
+  w_regulatory_agency: {
+    ts_type: "string",
+  },
+  w_rig_release_date: {
+    ts_type: "date",
+  },
+  w_row_changed_date: {
+    ts_type: "date",
+  },
+  w_source_document: {
+    ts_type: "string",
+  },
+  w_spud_date: {
+    ts_type: "date",
+  },
+  w_surface_latitude: {
+    ts_type: "number",
+  },
+  w_surface_longitude: {
+    ts_type: "number",
+  },
+  w_surface_node_id: {
+    ts_type: "string",
+  },
+  w_tax_credit_code: {
+    ts_type: "string",
+  },
+  w_td_form: {
+    ts_type: "string",
+  },
+  w_td_form_age: {
+    ts_type: "string",
+  },
+  w_uwi: {
+    ts_type: "string",
+  },
+  w_water_depth: {
+    ts_type: "number",
+  },
+  w_water_depth_datum: {
+    ts_type: "string",
+  },
+  w_water_depth_ouom: {
+    ts_type: "string",
+  },
+  w_well_govt_id: {
+    ts_type: "string",
+  },
+  w_well_intersect_md: {
+    ts_type: "number",
+  },
+  w_well_name: {
+    ts_type: "string",
+  },
+  w_well_number: {
+    ts_type: "string",
+  },
+  w_whipstock_depth: {
+    ts_type: "number",
+  },
+  w_whipstock_depth_ouom: {
+    ts_type: "string",
+  },
+
+  // R_INTERNAL_STATUS
+
+  fk_internal_status: {
+    ts_type: "string",
+  },
+
+  // LEGAL_CARTER_LOC
+
+  // LEGAL_CONGRESS_LOC
+
+  co_bh_flag: {
+    ts_type: "number",
+  },
+  co_congress_range: {
+    ts_type: "number",
+  },
+  co_congress_sect_suffix: {
+    ts_type: "string",
+  },
+  co_congress_sect_type: {
+    ts_type: "string",
+  },
+  co_congress_section: {
+    ts_type: "number",
+  },
+  co_congress_township: {
+    ts_type: "number",
+  },
+  co_congress_twp_name: {
+    ts_type: "string",
+  },
+  co_country: {
+    ts_type: "string",
+  },
+  co_county: {
+    ts_type: "string",
+  },
+  co_ew_direction: {
+    ts_type: "string",
+  },
+  co_ew_footage: {
+    ts_type: "number",
+  },
+  co_ew_footage_ouom: {
+    ts_type: "string",
+  },
+  co_ew_start_line: {
+    ts_type: "string",
+  },
+  co_footage_origin: {
+    ts_type: "string",
+  },
+  co_location_type: {
+    ts_type: "string",
+  },
+  co_ns_direction: {
+    ts_type: "string",
+  },
+  co_ns_footage: {
+    ts_type: "number",
+  },
+  co_ns_footage_ouom: {
+    ts_type: "string",
+  },
+  co_ns_start_line: {
+    ts_type: "string",
+  },
+  co_polygonid: {
+    ts_type: "number",
+  },
+  co_principal_meridian: {
+    ts_type: "string",
+  },
+  co_province_state: {
+    ts_type: "string",
+  },
+  co_remark: {
+    ts_type: "string",
+  },
+  co_row_changed_date: {
+    ts_type: "date",
+  },
+  co_source: {
+    ts_type: "string",
+  },
+  co_spot_code: {
+    ts_type: "string",
+  },
+  co_uwi: {
+    ts_type: "string",
+  },
+
+  // LEGAL_DLS_LOC
+  // LEGAL_FPS_LOC
+  // LEGAL_NE_LOC
+  // LEGAL_NORTH_SEA_LOC
+  // LEGAL_NTS_LOC
+  // LEGAL_OFFSHORE_LOC
+  // LEGAL_OHIO_LOC
+  // LEGAL_TEXAS_LOC
 };
 
 const prefixes = {

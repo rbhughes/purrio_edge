@@ -109,14 +109,43 @@ const defineSQL = (filter) => {
 };
 
 const xformer = (args) => {
-  let { func, key, arg, obj } = args;
+  let { func, key, typ, arg, obj } = args;
+
+  const ensureType = (type: string, val: any) => {
+    if (val == null) {
+      return null;
+    } else if (type === "object") {
+      console.log("UNEXPECTED OBJECT TYPE! (needs xformer)", type);
+      console.log(val);
+      return null;
+    } else if (type === "string") {
+      //return decodeWin1252(val)
+      return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+    } else if (type === "number") {
+      // cuz blank strings (\t\r\n) evaluate to 0
+      if (val.toString().replace(/\s/g, "") === "") {
+        return null;
+      }
+      let n = Number(val);
+      return isNaN(n) ? null : n;
+    } else if (type === "date") {
+      try {
+        return new Date(val).toISOString();
+      } catch (error) {
+        return null;
+      }
+    } else {
+      console.log("ENSURE TYPE SOMETHING ELSE (xformer)", type);
+      return "XFORM ME";
+    }
+  };
 
   if (obj[key] == null) {
     return null;
   }
 
   switch (func) {
-    case "blob_to_string":
+    case "blob_to_hex":
       return (() => {
         try {
           return Buffer.from(obj[key]).toString("hex");
@@ -141,14 +170,183 @@ const xformer = (args) => {
         }
       })();
     default:
-      console.warn("UNEXPECTED TRANSFORM FUNC: " + func);
-      return obj[key];
+      return ensureType(typ, obj[key]);
   }
 };
 
 const xforms = {
-  wcv_curve_values: "decode_curve_values",
-  wcv_curve_values_orig: "blob_to_string",
+  // WELL
+
+  w_uwi: {
+    ts_type: "string",
+  },
+  w_assigned_field: {
+    ts_type: "string",
+  },
+  w_common_well_name: {
+    ts_type: "string",
+  },
+  w_completion_date: {
+    ts_type: "date",
+  },
+  w_country: {
+    ts_type: "string",
+  },
+  w_county: {
+    ts_type: "string",
+  },
+  w_current_class: {
+    ts_type: "string",
+  },
+  w_current_status: {
+    ts_type: "string",
+  },
+  w_depth_datum: {
+    ts_type: "number",
+  },
+  w_final_td: {
+    ts_type: "number",
+  },
+  w_ground_elev: {
+    ts_type: "number",
+  },
+  w_kb_elev: {
+    ts_type: "number",
+  },
+  w_lease_name: {
+    ts_type: "string",
+  },
+  w_operator: {
+    ts_type: "string",
+  },
+  w_province_state: {
+    ts_type: "string",
+  },
+  w_row_changed_date: {
+    ts_type: "date",
+  },
+  w_spud_date: {
+    ts_type: "date",
+  },
+  w_surface_latitude: {
+    ts_type: "number",
+  },
+  w_surface_longitude: {
+    ts_type: "number",
+  },
+  w_td_form: {
+    ts_type: "string",
+  },
+  w_well_name: {
+    ts_type: "string",
+  },
+  w_well_number: {
+    ts_type: "string",
+  },
+
+  // GX_WELL_CURVE
+
+  wc_basedepth: {
+    ts_type: "number",
+  },
+  wc_cmd_type: {
+    ts_type: "string",
+  },
+  wc_curve_ouom: {
+    ts_type: "string",
+  },
+  wc_curve_uom: {
+    ts_type: "string",
+  },
+  wc_curvename: {
+    ts_type: "string",
+  },
+  wc_curveset: {
+    ts_type: "string",
+  },
+  wc_date_modified: {
+    ts_type: "date",
+  },
+  wc_description: {
+    ts_type: "string",
+  },
+  wc_remark: {
+    ts_type: "string",
+  },
+  wc_tool_type: {
+    ts_type: "string",
+  },
+  wc_topdepth: {
+    ts_type: "number",
+  },
+  wc_version: {
+    ts_type: "number",
+  },
+  wc_wellid: {
+    ts_type: "string",
+  },
+
+  // GX_WELL_CURVESET
+
+  wcs_basedepth: {
+    ts_type: "number",
+  },
+  wcs_curveset: {
+    ts_type: "string",
+  },
+  wcs_depthincr: {
+    ts_type: "number",
+  },
+  wcs_fielddata: {
+    ts_type: "number",
+  },
+  wcs_import_date: {
+    ts_type: "date",
+  },
+  wcs_log_job: {
+    ts_type: "number",
+  },
+  wcs_log_trip: {
+    ts_type: "string",
+  },
+  wcs_remark: {
+    ts_type: "string",
+  },
+  wcs_source_file: {
+    ts_type: "string",
+  },
+  wcs_topdepth: {
+    ts_type: "number",
+  },
+  wcs_type: {
+    ts_type: "string",
+  },
+  wcs_wellid: {
+    ts_type: "string",
+  },
+
+  // GX_WELL_CURVE_VALUES
+
+  wcv_curve_values: {
+    ts_type: "number",
+    xform: "decode_curve_values",
+  },
+  wcv_curve_values_orig: {
+    ts_type: "string",
+    xform: "blob_to_hex",
+  },
+  wcv_curvename: {
+    ts_type: "string",
+  },
+  wcv_curveset: {
+    ts_type: "string",
+  },
+  wcv_version: {
+    ts_type: "number",
+  },
+  wcv_wellid: {
+    ts_type: "string",
+  },
 };
 
 const prefixes = {
