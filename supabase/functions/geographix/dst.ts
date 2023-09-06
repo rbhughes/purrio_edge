@@ -363,231 +363,1117 @@ const xformer = (args) => {
 };
 
 const xforms = {
-  c_base_depth: "delimited_array_with_nulls",
-  c_base_form: "delimited_array_with_nulls",
-  c_completion_date: "delimited_array_with_nulls",
-  c_completion_form: "delimited_array_with_nulls",
-  c_completion_obs_no: "delimited_array_with_nulls",
-  c_completion_type: "delimited_array_with_nulls",
-  c_remark: "delimited_array_with_nulls",
-  c_row_changed_date: "delimited_array_with_nulls",
-  c_source: "delimited_array_with_nulls",
-  c_top_depth: "delimited_array_with_nulls",
-  c_top_form: "delimited_array_with_nulls",
-  c_uwi: "delimited_array_with_nulls",
+  w_uwi: {
+    ts_type: "string",
+  },
+  w_assigned_field: {
+    ts_type: "string",
+  },
+  w_common_well_name: {
+    ts_type: "string",
+  },
+  w_completion_date: {
+    ts_type: "date",
+  },
+  w_country: {
+    ts_type: "string",
+  },
+  w_county: {
+    ts_type: "string",
+  },
+  w_current_class: {
+    ts_type: "string",
+  },
+  w_current_status: {
+    ts_type: "string",
+  },
+  w_depth_datum: {
+    ts_type: "number",
+  },
+  w_final_td: {
+    ts_type: "number",
+  },
+  w_ground_elev: {
+    ts_type: "number",
+  },
+  w_kb_elev: {
+    ts_type: "number",
+  },
+  w_lease_name: {
+    ts_type: "string",
+  },
+  w_operator: {
+    ts_type: "string",
+  },
+  w_province_state: {
+    ts_type: "string",
+  },
+  w_row_changed_date: {
+    ts_type: "date",
+  },
+  w_spud_date: {
+    ts_type: "date",
+  },
+  w_surface_latitude: {
+    ts_type: "number",
+  },
+  w_surface_longitude: {
+    ts_type: "number",
+  },
+  w_td_form: {
+    ts_type: "string",
+  },
+  w_well_name: {
+    ts_type: "string",
+  },
+  w_well_number: {
+    ts_type: "string",
+  },
 
-  p_base_depth: "delimited_array_with_nulls",
-  p_base_form: "delimited_array_with_nulls",
-  p_cluster: "delimited_array_with_nulls",
-  p_completion_obs_no: "delimited_array_with_nulls",
-  p_completion_source: "delimited_array_with_nulls",
-  p_current_status: "delimited_array_with_nulls",
-  p_gx_base_form_alias: "delimited_array_with_nulls",
-  p_gx_top_form_alias: "delimited_array_with_nulls",
-  p_gx_top_form_alias: "delimited_array_with_nulls",
-  p_perforation_angle: "delimited_array_with_nulls",
-  p_perforation_count: "delimited_array_with_nulls",
-  p_perforation_date: "delimited_array_with_nulls",
-  p_perforation_density: "delimited_array_with_nulls",
-  p_perforation_diameter: "delimited_array_with_nulls",
-  p_perforation_diameter_ouom: "delimited_array_with_nulls",
-  p_perforation_obs_no: "delimited_array_with_nulls",
-  p_perforation_per_uom: "delimited_array_with_nulls",
-  p_perforation_phase: "delimited_array_with_nulls",
-  p_perforation_type: "delimited_array_with_nulls",
-  p_remark: "delimited_array_with_nulls",
-  p_row_changed_date: "delimited_array_with_nulls",
-  p_source: "delimited_array_with_nulls",
-  p_stage: "delimited_array_with_nulls",
-  p_top_depth: "delimited_array_with_nulls",
-  p_top_form: "delimited_array_with_nulls",
-  p_uwi: "delimited_array_with_nulls",
+  // WELL_TEST
 
-  t_base_depth: "delimited_array_with_nulls",
-  t_base_form: "delimited_array_with_nulls",
-  t_bottom_choke_desc: "delimited_array_with_nulls",
-  t_casing_press: "delimited_array_with_nulls",
-  t_choke_size_desc: "delimited_array_with_nulls",
-  t_flow_press: "delimited_array_with_nulls",
-  t_flow_temp: "delimited_array_with_nulls",
-  t_gas_flow_amt: "delimited_array_with_nulls",
-  t_gas_flow_amt_uom: "delimited_array_with_nulls",
-  t_gor: "delimited_array_with_nulls",
-  t_gx_base_form_alias: "delimited_array_with_nulls",
-  t_gx_bhp_z: "delimited_array_with_nulls",
-  t_gx_co2_pct: "delimited_array_with_nulls",
-  t_gx_conversion_factor: "delimited_array_with_nulls",
-  t_gx_cushion_type: "delimited_array_with_nulls",
-  t_gx_cushion_vol: "delimited_array_with_nulls",
-  t_gx_cushion_vol_ouom: "delimited_array_with_nulls",
-  t_gx_ft_flow_amt: "delimited_array_with_nulls",
-  t_gx_ft_flow_amt_uom: "delimited_array_with_nulls",
-  t_gx_gas_cum: "delimited_array_with_nulls",
-  t_gx_max_ft_flow_rate: "delimited_array_with_nulls",
-  t_gx_max_ft_flow_rate_uom: "delimited_array_with_nulls",
-  t_gx_recorder_depth: "delimited_array_with_nulls",
-  t_gx_top_form_alias: "delimited_array_with_nulls",
-  t_gx_tracer: "delimited_array_with_nulls",
-  t_gx_z_factor: "delimited_array_with_nulls",
-  t_h2s_pct: "delimited_array_with_nulls",
-  t_max_gas_flow_rate: "delimited_array_with_nulls",
-  t_max_hydrostatic_press: "delimited_array_with_nulls",
-  t_max_oil_flow_rate: "delimited_array_with_nulls",
-  t_max_water_flow_rate: "delimited_array_with_nulls",
-  t_oil_flow_amt: "delimited_array_with_nulls",
-  t_oil_flow_amt_uom: "delimited_array_with_nulls",
-  t_oil_gravity: "delimited_array_with_nulls",
-  t_primary_fluid_recovered: "delimited_array_with_nulls",
-  t_production_method: "delimited_array_with_nulls",
-  t_remark: "delimited_array_with_nulls",
-  t_report_temp: "delimited_array_with_nulls",
-  t_row_changed_date: "delimited_array_with_nulls",
-  t_run_number: "delimited_array_with_nulls",
-  t_shut_off_type: "delimited_array_with_nulls",
-  t_source: "delimited_array_with_nulls",
-  t_test_date: "delimited_array_with_nulls",
-  t_test_duration: "delimited_array_with_nulls",
-  t_test_number: "delimited_array_with_nulls",
-  t_test_subtype: "delimited_array_with_nulls",
-  t_test_type: "delimited_array_with_nulls",
-  t_top_choke_desc: "delimited_array_with_nulls",
-  t_top_depth: "delimited_array_with_nulls",
-  t_top_form: "delimited_array_with_nulls",
-  t_uwi: "delimited_array_with_nulls",
-  t_water_flow_amt: "delimited_array_with_nulls",
-  t_water_flow_amt_uom: "delimited_array_with_nulls",
+  id_t_uwi: {
+    ts_type: "string",
+  },
+  id_t_source: {
+    ts_type: "string",
+  },
+  id_t_test_type: {
+    ts_type: "string",
+  },
+  id_t_run_number: {
+    ts_type: "string",
+  },
+  t_base_depth: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_base_form: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_bottom_choke_desc: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_casing_press: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_choke_size_desc: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_flow_press: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_flow_temp: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gas_flow_amt: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gas_flow_amt_uom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gor: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_base_form_alias: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_bhp_z: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_co2_pct: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_conversion_factor: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_cushion_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_cushion_vol: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_cushion_vol_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_ft_flow_amt: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_ft_flow_amt_uom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_gas_cum: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_max_ft_flow_rate: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_max_ft_flow_rate_uom: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_recorder_depth: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_top_form_alias: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_tracer: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_gx_z_factor: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_h2s_pct: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_max_gas_flow_rate: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_max_hydrostatic_press: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_max_oil_flow_rate: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_max_water_flow_rate: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_oil_flow_amt: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_oil_flow_amt_uom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_oil_gravity: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_primary_fluid_recovered: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_production_method: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_remark: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_report_temp: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_row_changed_date: {
+    ts_type: "date",
+    xform: "delimited_array_with_nulls",
+  },
+  t_run_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_shut_off_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_source: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_test_date: {
+    ts_type: "date",
+    xform: "delimited_array_with_nulls",
+  },
+  t_test_duration: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_test_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_test_subtype: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_test_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_top_choke_desc: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_top_depth: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_top_form: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_uwi: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  t_water_flow_amt: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  t_water_flow_amt_uom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
 
-  s_end_press: "delimited_array_with_nulls",
-  s_end_press_ouom: "delimited_array_with_nulls",
-  s_gx_duration: "delimited_array_with_nulls",
-  s_period_type: "delimited_array_with_nulls",
-  s_quality_code: "delimited_array_with_nulls",
-  s_remark: "delimited_array_with_nulls",
-  s_row_changed_date: "delimited_array_with_nulls",
-  s_run_number: "delimited_array_with_nulls",
-  s_source: "delimited_array_with_nulls",
-  s_start_press: "delimited_array_with_nulls",
-  s_start_press_ouom: "delimited_array_with_nulls",
-  s_test_number: "delimited_array_with_nulls",
-  s_test_type: "delimited_array_with_nulls",
-  s_uwi: "delimited_array_with_nulls",
+  // WELL_TEST_PRESSURE
 
-  p_period_type: "delimited_array_with_nulls",
-  p_recovery_amt: "delimited_array_with_nulls",
-  p_recovery_amt_ouom: "delimited_array_with_nulls",
-  p_recovery_amt_uom: "delimited_array_with_nulls",
-  p_recovery_method: "delimited_array_with_nulls",
-  p_recovery_obs_no: "delimited_array_with_nulls",
-  p_recovery_type: "delimited_array_with_nulls",
-  p_remark: "delimited_array_with_nulls",
-  p_row_changed_date: "delimited_array_with_nulls",
-  p_run_number: "delimited_array_with_nulls",
-  p_source: "delimited_array_with_nulls",
-  p_test_number: "delimited_array_with_nulls",
-  p_test_type: "delimited_array_with_nulls",
-  p_uwi: "delimited_array_with_nulls",
+  id_s_uwi: {
+    ts_type: "string",
+  },
+  id_s_source: {
+    ts_type: "string",
+  },
+  id_s_test_type: {
+    ts_type: "string",
+  },
+  id_s_run_number: {
+    ts_type: "string",
+  },
+  s_end_press: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  s_end_press_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  s_gx_duration: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  s_period_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  s_quality_code: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  s_remark: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  s_row_changed_date: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  s_run_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  s_source: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  s_start_press: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  s_start_press_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  s_test_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  s_test_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  s_uwi: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
 
-  c_period_type: "delimited_array_with_nulls",
-  c_recovery_amt: "delimited_array_with_nulls",
-  c_recovery_amt_ouom: "delimited_array_with_nulls",
-  c_recovery_amt_uom: "delimited_array_with_nulls",
-  c_recovery_method: "delimited_array_with_nulls",
-  c_recovery_obs_no: "delimited_array_with_nulls",
-  c_recovery_type: "delimited_array_with_nulls",
-  c_remark: "delimited_array_with_nulls",
-  c_row_changed_date: "delimited_array_with_nulls",
-  c_run_number: "delimited_array_with_nulls",
-  c_source: "delimited_array_with_nulls",
-  c_test_number: "delimited_array_with_nulls",
-  c_test_type: "delimited_array_with_nulls",
-  c_uwi: "delimited_array_with_nulls",
+  // WELL_TEST_RECOVERY (PIPE)
 
-  f_fluid_type: "delimited_array_with_nulls",
-  f_max_fluid_rate: "delimited_array_with_nulls",
-  f_max_fluid_rate_ouom: "delimited_array_with_nulls",
-  f_max_fluid_rate_uom: "delimited_array_with_nulls",
-  f_max_surface_press: "delimited_array_with_nulls",
-  f_max_surface_press_ouom: "delimited_array_with_nulls",
-  f_period_obs_no: "delimited_array_with_nulls",
-  f_period_type: "delimited_array_with_nulls",
-  f_remark: "delimited_array_with_nulls",
-  f_row_changed_date: "delimited_array_with_nulls",
-  f_run_number: "delimited_array_with_nulls",
-  f_source: "delimited_array_with_nulls",
-  f_test_number: "delimited_array_with_nulls",
-  f_test_type: "delimited_array_with_nulls",
-  f_tts_elapsed_time_ouom: "delimited_array_with_nulls",
-  f_tts_elasped_time: "delimited_array_with_nulls",
-  f_uwi: "delimited_array_with_nulls",
+  id_p_uwi: {
+    ts_type: "string",
+  },
+  id_p_source: {
+    ts_type: "string",
+  },
+  id_p_test_type: {
+    ts_type: "string",
+  },
+  id_p_run_number: {
+    ts_type: "string",
+  },
+  p_period_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_recovery_amt: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_recovery_amt_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_recovery_amt_uom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_recovery_method: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_recovery_obs_no: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_recovery_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_remark: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_row_changed_date: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  p_run_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_source: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_test_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_test_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  p_uwi: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
 
-  a_analysis_obs_no: "delimited_array_with_nulls",
-  a_bsw: "delimited_array_with_nulls",
-  a_condensate_gravity: "delimited_array_with_nulls",
-  a_condensate_gravity_ouom: "delimited_array_with_nulls",
-  a_condensate_ratio: "delimited_array_with_nulls",
-  a_condensate_ratio_ouom: "delimited_array_with_nulls",
-  a_condensate_temp: "delimited_array_with_nulls",
-  a_condensate_temp_ouom: "delimited_array_with_nulls",
-  a_fluid_type: "delimited_array_with_nulls",
-  a_gas_content: "delimited_array_with_nulls",
-  a_gas_gravity: "delimited_array_with_nulls",
-  a_gas_gravity_ouom: "delimited_array_with_nulls",
-  a_gor: "delimited_array_with_nulls",
-  a_gor_ouom: "delimited_array_with_nulls",
-  a_gwr: "delimited_array_with_nulls",
-  a_gwr_ouom: "delimited_array_with_nulls",
-  a_gx_fluid_percent: "delimited_array_with_nulls",
-  a_h2s_pct: "delimited_array_with_nulls",
-  a_lgr: "delimited_array_with_nulls",
-  a_lgr_ouom: "delimited_array_with_nulls",
-  a_oil_density: "delimited_array_with_nulls",
-  a_oil_densty_ouom: "delimited_array_with_nulls",
-  a_oil_gravity: "delimited_array_with_nulls",
-  a_oil_gravity_ouom: "delimited_array_with_nulls",
-  a_oil_temp: "delimited_array_with_nulls",
-  a_oil_temp_ouom: "delimited_array_with_nulls",
-  a_period_obs_no: "delimited_array_with_nulls",
-  a_period_type: "delimited_array_with_nulls",
-  a_row_changed_date: "delimited_array_with_nulls",
-  a_run_number: "delimited_array_with_nulls",
-  a_salinity_type: "delimited_array_with_nulls",
-  a_source: "delimited_array_with_nulls",
-  a_sulphur_pct: "delimited_array_with_nulls",
-  a_test_number: "delimited_array_with_nulls",
-  a_test_type: "delimited_array_with_nulls",
-  a_uwi: "delimited_array_with_nulls",
-  a_water_cut: "delimited_array_with_nulls",
-  a_water_resistivity: "delimited_array_with_nulls",
-  a_water_resistivity_ouom: "delimited_array_with_nulls",
-  a_water_salinity: "delimited_array_with_nulls",
-  a_water_salinity_ouom: "delimited_array_with_nulls",
-  a_water_temp: "delimited_array_with_nulls",
-  a_water_temp_ouom: "delimited_array_with_nulls",
-  a_wor: "delimited_array_with_nulls",
+  // WELL_TEST_RECOVERY (CHAMBER)
 
-  m_filtrate_resistivity: "delimited_array_with_nulls",
-  m_filtrate_resistivity_ouom: "delimited_array_with_nulls",
-  m_filtrate_temp: "delimited_array_with_nulls",
-  m_filtrate_temp_ouom: "delimited_array_with_nulls",
-  m_gx_filter_cake_thickness: "delimited_array_with_nulls",
-  m_gx_tracer: "delimited_array_with_nulls",
-  m_gx_water_loss: "delimited_array_with_nulls",
-  m_mud_resistivity: "delimited_array_with_nulls",
-  m_mud_resistivity_ouom: "delimited_array_with_nulls",
-  m_mud_temp: "delimited_array_with_nulls",
-  m_mud_temp_ouom: "delimited_array_with_nulls",
-  m_mud_type: "delimited_array_with_nulls",
-  m_mud_viscosity: "delimited_array_with_nulls",
-  m_mud_viscosity_ouom: "delimited_array_with_nulls",
-  m_mud_weight: "delimited_array_with_nulls",
-  m_mud_weight_ouom: "delimited_array_with_nulls",
-  m_row_changed_date: "delimited_array_with_nulls",
-  m_run_number: "delimited_array_with_nulls",
-  m_source: "delimited_array_with_nulls",
-  m_test_number: "delimited_array_with_nulls",
-  m_test_type: "delimited_array_with_nulls",
-  m_uwi: "delimited_array_with_nulls",
+  id_c_uwi: {
+    ts_type: "string",
+  },
+  id_c_source: {
+    ts_type: "string",
+  },
+  id_c_test_type: {
+    ts_type: "string",
+  },
+  id_c_run_number: {
+    ts_type: "string",
+  },
+  c_period_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_recovery_amt: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_recovery_amt_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_recovery_amt_uom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_recovery_method: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_recovery_obs_no: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_recovery_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_remark: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_row_changed_date: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_run_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_source: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_test_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_test_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_uwi: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+
+  // WELL_TEST_FLOW
+
+  id_f_uwi: {
+    ts_type: "string",
+  },
+  id_f_source: {
+    ts_type: "string",
+  },
+  id_f_test_type: {
+    ts_type: "string",
+  },
+  id_f_run_number: {
+    ts_type: "string",
+  },
+  f_fluid_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_max_fluid_rate: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  f_max_fluid_rate_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_max_fluid_rate_uom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_max_surface_press: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  f_max_surface_press_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_period_obs_no: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  f_period_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_remark: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_row_changed_date: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  f_run_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_source: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_test_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_test_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_tts_elapsed_time_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_tts_elasped_time: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  f_uwi: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+
+  // WELL_TEST_ANALYSIS
+
+  id_a_uwi: {
+    ts_type: "string",
+  },
+  id_a_source: {
+    ts_type: "string",
+  },
+  id_a_test_type: {
+    ts_type: "string",
+  },
+  id_a_run_number: {
+    ts_type: "string",
+  },
+  a_analysis_obs_no: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_bsw: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_condensate_gravity: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_condensate_gravity_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_condensate_ratio: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_condensate_ratio_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_condensate_temp: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_condensate_temp_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_fluid_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_gas_content: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_gas_gravity: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_gas_gravity_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_gor: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_gor_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_gwr: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_gwr_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_gx_fluid_percent: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_h2s_pct: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_lgr: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_lgr_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_oil_density: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_oil_densty_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_oil_gravity: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_oil_gravity_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_oil_temp: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_oil_temp_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_period_obs_no: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_period_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_row_changed_date: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_run_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_salinity_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_source: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_sulphur_pct: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_test_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_test_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_uwi: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_water_cut: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_water_resistivity: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_water_resistivity_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_water_salinity: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_water_salinity_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_water_temp: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_water_temp_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  a_wor: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+
+  // WELL_TEST_MUD
+
+  id_m_uwi: {
+    ts_type: "string",
+  },
+  id_m_source: {
+    ts_type: "string",
+  },
+  id_m_test_type: {
+    ts_type: "string",
+  },
+  id_m_run_number: {
+    ts_type: "string",
+  },
+  m_filtrate_resistivity: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  m_filtrate_resistivity_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_filtrate_temp: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  m_filtrate_temp_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_gx_filter_cake_thickness: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  m_gx_tracer: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_gx_water_loss: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  m_mud_resistivity: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  m_mud_resistivity_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_mud_temp: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  m_mud_temp_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_mud_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_mud_viscosity: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  m_mud_viscosity_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_mud_weight: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  m_mud_weight_ouom: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_row_changed_date: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  m_run_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_source: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_test_number: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_test_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  m_uwi: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
 };
+
+// const xforms = {
+//   c_base_depth: "delimited_array_with_nulls",
+//   c_base_form: "delimited_array_with_nulls",
+//   c_completion_date: "delimited_array_with_nulls",
+//   c_completion_form: "delimited_array_with_nulls",
+//   c_completion_obs_no: "delimited_array_with_nulls",
+//   c_completion_type: "delimited_array_with_nulls",
+//   c_remark: "delimited_array_with_nulls",
+//   c_row_changed_date: "delimited_array_with_nulls",
+//   c_source: "delimited_array_with_nulls",
+//   c_top_depth: "delimited_array_with_nulls",
+//   c_top_form: "delimited_array_with_nulls",
+//   c_uwi: "delimited_array_with_nulls",
+
+//   p_base_depth: "delimited_array_with_nulls",
+//   p_base_form: "delimited_array_with_nulls",
+//   p_cluster: "delimited_array_with_nulls",
+//   p_completion_obs_no: "delimited_array_with_nulls",
+//   p_completion_source: "delimited_array_with_nulls",
+//   p_current_status: "delimited_array_with_nulls",
+//   p_gx_base_form_alias: "delimited_array_with_nulls",
+//   p_gx_top_form_alias: "delimited_array_with_nulls",
+//   p_gx_top_form_alias: "delimited_array_with_nulls",
+//   p_perforation_angle: "delimited_array_with_nulls",
+//   p_perforation_count: "delimited_array_with_nulls",
+//   p_perforation_date: "delimited_array_with_nulls",
+//   p_perforation_density: "delimited_array_with_nulls",
+//   p_perforation_diameter: "delimited_array_with_nulls",
+//   p_perforation_diameter_ouom: "delimited_array_with_nulls",
+//   p_perforation_obs_no: "delimited_array_with_nulls",
+//   p_perforation_per_uom: "delimited_array_with_nulls",
+//   p_perforation_phase: "delimited_array_with_nulls",
+//   p_perforation_type: "delimited_array_with_nulls",
+//   p_remark: "delimited_array_with_nulls",
+//   p_row_changed_date: "delimited_array_with_nulls",
+//   p_source: "delimited_array_with_nulls",
+//   p_stage: "delimited_array_with_nulls",
+//   p_top_depth: "delimited_array_with_nulls",
+//   p_top_form: "delimited_array_with_nulls",
+//   p_uwi: "delimited_array_with_nulls",
+
+//   t_base_depth: "delimited_array_with_nulls",
+//   t_base_form: "delimited_array_with_nulls",
+//   t_bottom_choke_desc: "delimited_array_with_nulls",
+//   t_casing_press: "delimited_array_with_nulls",
+//   t_choke_size_desc: "delimited_array_with_nulls",
+//   t_flow_press: "delimited_array_with_nulls",
+//   t_flow_temp: "delimited_array_with_nulls",
+//   t_gas_flow_amt: "delimited_array_with_nulls",
+//   t_gas_flow_amt_uom: "delimited_array_with_nulls",
+//   t_gor: "delimited_array_with_nulls",
+//   t_gx_base_form_alias: "delimited_array_with_nulls",
+//   t_gx_bhp_z: "delimited_array_with_nulls",
+//   t_gx_co2_pct: "delimited_array_with_nulls",
+//   t_gx_conversion_factor: "delimited_array_with_nulls",
+//   t_gx_cushion_type: "delimited_array_with_nulls",
+//   t_gx_cushion_vol: "delimited_array_with_nulls",
+//   t_gx_cushion_vol_ouom: "delimited_array_with_nulls",
+//   t_gx_ft_flow_amt: "delimited_array_with_nulls",
+//   t_gx_ft_flow_amt_uom: "delimited_array_with_nulls",
+//   t_gx_gas_cum: "delimited_array_with_nulls",
+//   t_gx_max_ft_flow_rate: "delimited_array_with_nulls",
+//   t_gx_max_ft_flow_rate_uom: "delimited_array_with_nulls",
+//   t_gx_recorder_depth: "delimited_array_with_nulls",
+//   t_gx_top_form_alias: "delimited_array_with_nulls",
+//   t_gx_tracer: "delimited_array_with_nulls",
+//   t_gx_z_factor: "delimited_array_with_nulls",
+//   t_h2s_pct: "delimited_array_with_nulls",
+//   t_max_gas_flow_rate: "delimited_array_with_nulls",
+//   t_max_hydrostatic_press: "delimited_array_with_nulls",
+//   t_max_oil_flow_rate: "delimited_array_with_nulls",
+//   t_max_water_flow_rate: "delimited_array_with_nulls",
+//   t_oil_flow_amt: "delimited_array_with_nulls",
+//   t_oil_flow_amt_uom: "delimited_array_with_nulls",
+//   t_oil_gravity: "delimited_array_with_nulls",
+//   t_primary_fluid_recovered: "delimited_array_with_nulls",
+//   t_production_method: "delimited_array_with_nulls",
+//   t_remark: "delimited_array_with_nulls",
+//   t_report_temp: "delimited_array_with_nulls",
+//   t_row_changed_date: "delimited_array_with_nulls",
+//   t_run_number: "delimited_array_with_nulls",
+//   t_shut_off_type: "delimited_array_with_nulls",
+//   t_source: "delimited_array_with_nulls",
+//   t_test_date: "delimited_array_with_nulls",
+//   t_test_duration: "delimited_array_with_nulls",
+//   t_test_number: "delimited_array_with_nulls",
+//   t_test_subtype: "delimited_array_with_nulls",
+//   t_test_type: "delimited_array_with_nulls",
+//   t_top_choke_desc: "delimited_array_with_nulls",
+//   t_top_depth: "delimited_array_with_nulls",
+//   t_top_form: "delimited_array_with_nulls",
+//   t_uwi: "delimited_array_with_nulls",
+//   t_water_flow_amt: "delimited_array_with_nulls",
+//   t_water_flow_amt_uom: "delimited_array_with_nulls",
+
+//   s_end_press: "delimited_array_with_nulls",
+//   s_end_press_ouom: "delimited_array_with_nulls",
+//   s_gx_duration: "delimited_array_with_nulls",
+//   s_period_type: "delimited_array_with_nulls",
+//   s_quality_code: "delimited_array_with_nulls",
+//   s_remark: "delimited_array_with_nulls",
+//   s_row_changed_date: "delimited_array_with_nulls",
+//   s_run_number: "delimited_array_with_nulls",
+//   s_source: "delimited_array_with_nulls",
+//   s_start_press: "delimited_array_with_nulls",
+//   s_start_press_ouom: "delimited_array_with_nulls",
+//   s_test_number: "delimited_array_with_nulls",
+//   s_test_type: "delimited_array_with_nulls",
+//   s_uwi: "delimited_array_with_nulls",
+
+//   p_period_type: "delimited_array_with_nulls",
+//   p_recovery_amt: "delimited_array_with_nulls",
+//   p_recovery_amt_ouom: "delimited_array_with_nulls",
+//   p_recovery_amt_uom: "delimited_array_with_nulls",
+//   p_recovery_method: "delimited_array_with_nulls",
+//   p_recovery_obs_no: "delimited_array_with_nulls",
+//   p_recovery_type: "delimited_array_with_nulls",
+//   p_remark: "delimited_array_with_nulls",
+//   p_row_changed_date: "delimited_array_with_nulls",
+//   p_run_number: "delimited_array_with_nulls",
+//   p_source: "delimited_array_with_nulls",
+//   p_test_number: "delimited_array_with_nulls",
+//   p_test_type: "delimited_array_with_nulls",
+//   p_uwi: "delimited_array_with_nulls",
+
+//   c_period_type: "delimited_array_with_nulls",
+//   c_recovery_amt: "delimited_array_with_nulls",
+//   c_recovery_amt_ouom: "delimited_array_with_nulls",
+//   c_recovery_amt_uom: "delimited_array_with_nulls",
+//   c_recovery_method: "delimited_array_with_nulls",
+//   c_recovery_obs_no: "delimited_array_with_nulls",
+//   c_recovery_type: "delimited_array_with_nulls",
+//   c_remark: "delimited_array_with_nulls",
+//   c_row_changed_date: "delimited_array_with_nulls",
+//   c_run_number: "delimited_array_with_nulls",
+//   c_source: "delimited_array_with_nulls",
+//   c_test_number: "delimited_array_with_nulls",
+//   c_test_type: "delimited_array_with_nulls",
+//   c_uwi: "delimited_array_with_nulls",
+
+//   f_fluid_type: "delimited_array_with_nulls",
+//   f_max_fluid_rate: "delimited_array_with_nulls",
+//   f_max_fluid_rate_ouom: "delimited_array_with_nulls",
+//   f_max_fluid_rate_uom: "delimited_array_with_nulls",
+//   f_max_surface_press: "delimited_array_with_nulls",
+//   f_max_surface_press_ouom: "delimited_array_with_nulls",
+//   f_period_obs_no: "delimited_array_with_nulls",
+//   f_period_type: "delimited_array_with_nulls",
+//   f_remark: "delimited_array_with_nulls",
+//   f_row_changed_date: "delimited_array_with_nulls",
+//   f_run_number: "delimited_array_with_nulls",
+//   f_source: "delimited_array_with_nulls",
+//   f_test_number: "delimited_array_with_nulls",
+//   f_test_type: "delimited_array_with_nulls",
+//   f_tts_elapsed_time_ouom: "delimited_array_with_nulls",
+//   f_tts_elasped_time: "delimited_array_with_nulls",
+//   f_uwi: "delimited_array_with_nulls",
+
+//   a_analysis_obs_no: "delimited_array_with_nulls",
+//   a_bsw: "delimited_array_with_nulls",
+//   a_condensate_gravity: "delimited_array_with_nulls",
+//   a_condensate_gravity_ouom: "delimited_array_with_nulls",
+//   a_condensate_ratio: "delimited_array_with_nulls",
+//   a_condensate_ratio_ouom: "delimited_array_with_nulls",
+//   a_condensate_temp: "delimited_array_with_nulls",
+//   a_condensate_temp_ouom: "delimited_array_with_nulls",
+//   a_fluid_type: "delimited_array_with_nulls",
+//   a_gas_content: "delimited_array_with_nulls",
+//   a_gas_gravity: "delimited_array_with_nulls",
+//   a_gas_gravity_ouom: "delimited_array_with_nulls",
+//   a_gor: "delimited_array_with_nulls",
+//   a_gor_ouom: "delimited_array_with_nulls",
+//   a_gwr: "delimited_array_with_nulls",
+//   a_gwr_ouom: "delimited_array_with_nulls",
+//   a_gx_fluid_percent: "delimited_array_with_nulls",
+//   a_h2s_pct: "delimited_array_with_nulls",
+//   a_lgr: "delimited_array_with_nulls",
+//   a_lgr_ouom: "delimited_array_with_nulls",
+//   a_oil_density: "delimited_array_with_nulls",
+//   a_oil_densty_ouom: "delimited_array_with_nulls",
+//   a_oil_gravity: "delimited_array_with_nulls",
+//   a_oil_gravity_ouom: "delimited_array_with_nulls",
+//   a_oil_temp: "delimited_array_with_nulls",
+//   a_oil_temp_ouom: "delimited_array_with_nulls",
+//   a_period_obs_no: "delimited_array_with_nulls",
+//   a_period_type: "delimited_array_with_nulls",
+//   a_row_changed_date: "delimited_array_with_nulls",
+//   a_run_number: "delimited_array_with_nulls",
+//   a_salinity_type: "delimited_array_with_nulls",
+//   a_source: "delimited_array_with_nulls",
+//   a_sulphur_pct: "delimited_array_with_nulls",
+//   a_test_number: "delimited_array_with_nulls",
+//   a_test_type: "delimited_array_with_nulls",
+//   a_uwi: "delimited_array_with_nulls",
+//   a_water_cut: "delimited_array_with_nulls",
+//   a_water_resistivity: "delimited_array_with_nulls",
+//   a_water_resistivity_ouom: "delimited_array_with_nulls",
+//   a_water_salinity: "delimited_array_with_nulls",
+//   a_water_salinity_ouom: "delimited_array_with_nulls",
+//   a_water_temp: "delimited_array_with_nulls",
+//   a_water_temp_ouom: "delimited_array_with_nulls",
+//   a_wor: "delimited_array_with_nulls",
+
+//   m_filtrate_resistivity: "delimited_array_with_nulls",
+//   m_filtrate_resistivity_ouom: "delimited_array_with_nulls",
+//   m_filtrate_temp: "delimited_array_with_nulls",
+//   m_filtrate_temp_ouom: "delimited_array_with_nulls",
+//   m_gx_filter_cake_thickness: "delimited_array_with_nulls",
+//   m_gx_tracer: "delimited_array_with_nulls",
+//   m_gx_water_loss: "delimited_array_with_nulls",
+//   m_mud_resistivity: "delimited_array_with_nulls",
+//   m_mud_resistivity_ouom: "delimited_array_with_nulls",
+//   m_mud_temp: "delimited_array_with_nulls",
+//   m_mud_temp_ouom: "delimited_array_with_nulls",
+//   m_mud_type: "delimited_array_with_nulls",
+//   m_mud_viscosity: "delimited_array_with_nulls",
+//   m_mud_viscosity_ouom: "delimited_array_with_nulls",
+//   m_mud_weight: "delimited_array_with_nulls",
+//   m_mud_weight_ouom: "delimited_array_with_nulls",
+//   m_row_changed_date: "delimited_array_with_nulls",
+//   m_run_number: "delimited_array_with_nulls",
+//   m_source: "delimited_array_with_nulls",
+//   m_test_number: "delimited_array_with_nulls",
+//   m_test_type: "delimited_array_with_nulls",
+//   m_uwi: "delimited_array_with_nulls",
+// };
 
 const prefixes = {
   w_: "well",
