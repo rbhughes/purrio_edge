@@ -6,8 +6,7 @@ const defineSQL = (filter) => {
   const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
 
   let select = `SELECT * FROM (
-    WITH
-    w AS (
+    WITH w AS (
       SELECT
         uwi                         AS w_uwi,
         abandonment_date            AS w_abandonment_date,
