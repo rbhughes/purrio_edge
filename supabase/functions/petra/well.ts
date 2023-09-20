@@ -205,13 +205,60 @@ const xformer = (args) => {
   }
 
   switch (func) {
+    case "excel_date":
+      return (() => {
+        try {
+          const d = new Date(Math.round((obj[key] - 25569) * 86400 * 1000));
+          return d.toISOString();
+        } catch (error) {
+          console.log("ERROR", error);
+          return null;
+        }
+      })();
+    case "parse_congressional":
+      return (() => {
+        try {
+          const b = Buffer.from(obj[key]);
+          const cong = {
+            township: b.subarray(4, 6).toString().split("\x00")[0],
+            township_ns: b.subarray(71, 72).toString(),
+            range: b.subarray(21, 23).toString().split("\x00")[0],
+            range_ew: b.subarray(70, 71).toString(),
+            section: b.subarray(38, 54).toString().split("\x00")[0],
+            section_suffix: b.subarray(54, 70).toString().split("\x00")[0],
+            meridian: b.subarray(153, 155).toString(),
+            footage_ref: b.subarray(137, 152).toString().split("\x00")[0],
+            spot: b.subarray(96, 136).toString().split("\x00")[0],
+            footage_call_ns: b.subarray(88, 96).readDoubleLE(),
+            footage_call_ns_ref: b.subarray(76, 80).readInt16LE(),
+            footage_call_ew: b.subarray(80, 88).readDoubleLE(),
+            footage_call_ew_ref: b.subarray(72, 76).readInt16LE(),
+            remarks: b.subarray(156, 412).toString().split("\x00")[0],
+          };
+          return JSON.stringify(cong);
+        } catch (error) {
+          console.log("ERROR", error);
+          return null;
+        }
+      })();
     case "blob_to_hex":
       return (() => {
         try {
           return Buffer.from(obj[key]).toString("hex");
         } catch (error) {
           console.log("ERROR", error);
-          return;
+          return null;
+        }
+      })();
+    case "memo_to_string":
+      return (() => {
+        try {
+          const buf = Buffer.from(obj[key], "binary");
+          //return buf.toString("utf-8");
+          return ensureType("string", buf.toString("utf-8"));
+        } catch (error) {
+          console.log("ERROR", error);
+          return null;
         }
       })();
     default:
@@ -219,11 +266,280 @@ const xformer = (args) => {
   }
 };
 
-const xforms = {};
+const xforms = {
+  // WELL
+
+  w_wsn: {
+    ts_type: "number",
+  },
+  w_flags: {
+    ts_type: "number",
+  },
+  w_adddate: {
+    ts_type: "number",
+    xform: "excel_date",
+  },
+  w_chgdate: {
+    ts_type: "number",
+    xform: "excel_date",
+  },
+  w_elev_zid: {
+    ts_type: "number",
+  },
+  w_elev_fid: {
+    ts_type: "number",
+  },
+  w_symbol: {
+    ts_type: "number",
+  },
+  w_uwi: {
+    ts_type: "string",
+  },
+  w_label: {
+    ts_type: "string",
+  },
+  w_shortname: {
+    ts_type: "string",
+  },
+  w_wellname: {
+    ts_type: "string",
+  },
+  w_symcode: {
+    ts_type: "string",
+  },
+  w_operator: {
+    ts_type: "string",
+  },
+  w_histoper: {
+    ts_type: "string",
+  },
+  w_leasename: {
+    ts_type: "string",
+  },
+  w_leasenumber: {
+    ts_type: "string",
+  },
+  w_fieldname: {
+    ts_type: "string",
+  },
+  w_fmattd: {
+    ts_type: "string",
+  },
+  w_prodfm: {
+    ts_type: "string",
+  },
+  w_county: {
+    ts_type: "string",
+  },
+  w_state: {
+    ts_type: "string",
+  },
+  w_remarks: {
+    ts_type: "string",
+    xform: "memo_to_string",
+  },
+
+  // LOCAT
+
+  s_wsn: {
+    ts_type: "number",
+  },
+  s_flags: {
+    ts_type: "number",
+  },
+  s_x: {
+    ts_type: "number",
+  },
+  s_y: {
+    ts_type: "number",
+  },
+  s_z: {
+    ts_type: "number",
+  },
+  s_lat: {
+    ts_type: "number",
+  },
+  s_lon: {
+    ts_type: "number",
+  },
+  s_botlat: {
+    ts_type: "number",
+  },
+  s_botlon: {
+    ts_type: "number",
+  },
+  s_botx: {
+    ts_type: "number",
+  },
+  s_boty: {
+    ts_type: "number",
+  },
+  s_congress: {
+    ts_type: "number",
+    xform: "parse_congressional",
+  },
+  s_congress_orig: {
+    ts_type: "number",
+    xform: "blob_to_hex",
+  },
+  s_texasloc: {
+    ts_type: "string",
+    xform: "blob_to_hex",
+  },
+  s_offshore: {
+    ts_type: "number",
+    xform: "blob_to_hex",
+  },
+  s_chgdate: {
+    ts_type: "date",
+  },
+
+  // BHLOC
+
+  b_wsn: {
+    ts_type: "number",
+  },
+  b_flags: {
+    ts_type: "number",
+  },
+  b_x: {
+    ts_type: "number",
+  },
+  b_y: {
+    ts_type: "number",
+  },
+  b_z: {
+    ts_type: "number",
+  },
+  b_lat: {
+    ts_type: "number",
+  },
+  b_lon: {
+    ts_type: "number",
+  },
+  b_congress: {
+    ts_type: "number",
+    xform: "parse_congressional",
+  },
+  b_congress_orig: {
+    ts_type: "number",
+    xform: "blob_to_hex",
+  },
+  b_texasloc: {
+    ts_type: "string",
+    xform: "blob_to_hex",
+  },
+  b_offshore: {
+    ts_type: "number",
+    xform: "blob_to_hex",
+  },
+  b_chgdate: {
+    ts_type: "date",
+  },
+
+  // ZDATA
+
+  w_elev_kb: {
+    ts_type: "number",
+  },
+  w_elev_df: {
+    ts_type: "number",
+  },
+  w_elev_gr: {
+    ts_type: "number",
+  },
+  w_elev_seis: {
+    ts_type: "number",
+  },
+  w_td: {
+    ts_type: "number",
+  },
+  w_cumoil: {
+    ts_type: "number",
+  },
+  w_cumgas: {
+    ts_type: "number",
+  },
+  w_cumwtr: {
+    ts_type: "number",
+  },
+  w_whipstock: {
+    ts_type: "number",
+  },
+  w_wtrdepth: {
+    ts_type: "number",
+  },
+  w_comp_date: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  w_spud_date: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  w_permit_date: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  w_rig_date: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  w_aband_date: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  w_report_date: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  w_wrs_date: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  w_last_act_date: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  w_platform: {
+    ts_type: "string",
+    xform: "memo_to_string",
+  },
+
+  // UWI
+
+  u_wsn: {
+    ts_type: "number",
+  },
+  u_uwi: {
+    ts_type: "string",
+  },
+  u_label: {
+    ts_type: "string",
+  },
+  u_sortname: {
+    ts_type: "string",
+  },
+  u_flags: {
+    ts_type: "number",
+  },
+
+  // ZFLDDEF
+
+  o_active_datum_value: {
+    ts_type: "number",
+  },
+
+  o_active_datum: {
+    ts_type: "string",
+  },
+};
 
 const prefixes = {
   w_: "well",
-  co_: "legal_congress_loc",
+  s_: "locat",
+  b_: "bhloc",
+  u_: "uwi",
 };
 
 const global_id_keys = ["w_uwi"];
