@@ -4,9 +4,11 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+import { getAssetDNA as completion_dna } from "./completion.ts";
 import { getAssetDNA as well_dna } from "./well.ts";
 
 const vault = {
+  completion: completion_dna,
   well: well_dna,
 };
 

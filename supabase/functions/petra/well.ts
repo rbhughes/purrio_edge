@@ -64,25 +64,26 @@ const defineSQL = (filter) => {
     b.offshore     AS b_offshore,
     b.chgdate      AS b_chgdate,
     
-    z_1.z          AS w_elev_kb,
-    z_2.z          AS w_elev_df,
-    z_3.z          AS w_elev_gr,
-    z_4.z          AS w_elev_seis,
-    z_5.z          AS w_td,
-    z_6.z          AS w_cumoil,
-    z_7.z          AS w_cumgas,
-    z_8.z          AS w_cumwtr,
-    z_9.z          AS w_whipstock,
-    z_10.z         AS w_wtrdepth,
-    z_11.z         AS w_comp_date,
-    z_12.z         AS w_spud_date,
-    z_13.z         AS w_permit_date,
-    z_14.z         AS w_rig_date,
-    z_15.z         AS w_aband_date,
-    z_16.z         AS w_report_date,
-    z_17.z         AS w_wrs_date,
-    z_18.z         AS w_last_act_date,
-    z_19.text      AS w_platform,
+    z_1.z          AS z_elev_kb,
+    z_2.z          AS z_elev_df,
+    z_3.z          AS z_elev_gr,
+    z_4.z          AS z_elev_seis,
+    z_5.z          AS z_td,
+    z_6.z          AS z_cumoil,
+    z_7.z          AS z_cumgas,
+    z_8.z          AS z_cumwtr,
+    z_9.z          AS z_whipstock,
+    z_10.z         AS z_wtrdepth,
+    z_11.z         AS z_comp_date,
+    z_12.z         AS z_spud_date,
+    z_13.z         AS z_permit_date,
+    z_14.z         AS z_rig_date,
+    z_15.z         AS z_aband_date,
+    z_16.z         AS z_report_date,
+    z_17.z         AS z_wrs_date,
+    z_18.z         AS z_last_act_date,
+    z_19.text      AS z_platform,
+    z_20.z         AS z_active_datum_value,
     
     u.wsn          AS u_wsn,
     u.uwi          AS u_uwi,
@@ -90,8 +91,7 @@ const defineSQL = (filter) => {
     u.sortname     AS u_sortname,
     u.flags        AS u_flags,      
     
-    zf.name        AS o_active_datum,
-    adv.z          AS o_active_datum_value
+    f.name         AS f_active_datum
     
   FROM well w
   LEFT JOIN locat s ON s.wsn = w.wsn
@@ -116,8 +116,8 @@ const defineSQL = (filter) => {
   LEFT OUTER JOIN zdata z_17 ON w.wsn = z_17.wsn AND z_17.fid = 17
   LEFT OUTER JOIN zdata z_18 ON w.wsn = z_18.wsn AND z_18.fid = 18
   LEFT OUTER JOIN zdata z_19 ON w.wsn = z_19.wsn AND z_19.fid = 19
-  LEFT OUTER JOIN zflddef zf ON zf.zid = 2 AND zf.fid = w.elev_zid
-  LEFT OUTER JOIN zdata adv ON w.wsn = adv.wsn AND adv.fid = w.elev_fid
+  LEFT OUTER JOIN zflddef f ON f.zid = 2 AND f.fid = w.elev_zid
+  LEFT OUTER JOIN zdata z_20 ON w.wsn = z_20.wsn AND z_20.fid = w.elev_fid
   ${where_clause_stub}
   `;
 
@@ -153,7 +153,7 @@ const defineSQL = (filter) => {
     LEFT OUTER JOIN zdata z_17 ON w.wsn = z_17.wsn AND z_17.fid = 17
     LEFT OUTER JOIN zdata z_18 ON w.wsn = z_18.wsn AND z_18.fid = 18
     LEFT OUTER JOIN zdata z_19 ON w.wsn = z_19.wsn AND z_19.fid = 19
-    LEFT OUTER JOIN zflddef zf ON zf.zid = 2 AND zf.fid = w.elev_zid
+    LEFT OUTER JOIN zflddef f ON f.zid = 2 AND f.fid = w.elev_zid
     LEFT OUTER JOIN zdata adv ON w.wsn = adv.wsn AND adv.fid = w.elev_fid
     ${where}`;
 
@@ -254,7 +254,6 @@ const xformer = (args) => {
       return (() => {
         try {
           const buf = Buffer.from(obj[key], "binary");
-          //return buf.toString("utf-8");
           return ensureType("string", buf.toString("utf-8"));
         } catch (error) {
           console.log("ERROR", error);
@@ -439,71 +438,74 @@ const xforms = {
 
   // ZDATA
 
-  w_elev_kb: {
+  z_elev_kb: {
     ts_type: "number",
   },
-  w_elev_df: {
+  z_elev_df: {
     ts_type: "number",
   },
-  w_elev_gr: {
+  z_elev_gr: {
     ts_type: "number",
   },
-  w_elev_seis: {
+  z_elev_seis: {
     ts_type: "number",
   },
-  w_td: {
+  z_td: {
     ts_type: "number",
   },
-  w_cumoil: {
+  z_cumoil: {
     ts_type: "number",
   },
-  w_cumgas: {
+  z_cumgas: {
     ts_type: "number",
   },
-  w_cumwtr: {
+  z_cumwtr: {
     ts_type: "number",
   },
-  w_whipstock: {
+  z_whipstock: {
     ts_type: "number",
   },
-  w_wtrdepth: {
+  z_wtrdepth: {
     ts_type: "number",
   },
-  w_comp_date: {
+  z_comp_date: {
     ts_type: "date",
     xform: "excel_date",
   },
-  w_spud_date: {
+  z_spud_date: {
     ts_type: "date",
     xform: "excel_date",
   },
-  w_permit_date: {
+  z_permit_date: {
     ts_type: "date",
     xform: "excel_date",
   },
-  w_rig_date: {
+  z_rig_date: {
     ts_type: "date",
     xform: "excel_date",
   },
-  w_aband_date: {
+  z_aband_date: {
     ts_type: "date",
     xform: "excel_date",
   },
-  w_report_date: {
+  z_report_date: {
     ts_type: "date",
     xform: "excel_date",
   },
-  w_wrs_date: {
+  z_wrs_date: {
     ts_type: "date",
     xform: "excel_date",
   },
-  w_last_act_date: {
+  z_last_act_date: {
     ts_type: "date",
     xform: "excel_date",
   },
-  w_platform: {
+  z_platform: {
     ts_type: "string",
     xform: "memo_to_string",
+  },
+  z_active_datum_value: {
+    ts_type: "number",
   },
 
   // UWI
@@ -526,11 +528,7 @@ const xforms = {
 
   // ZFLDDEF
 
-  o_active_datum_value: {
-    ts_type: "number",
-  },
-
-  o_active_datum: {
+  f_active_datum: {
     ts_type: "string",
   },
 };
@@ -539,7 +537,9 @@ const prefixes = {
   w_: "well",
   s_: "locat",
   b_: "bhloc",
+  z_: "zdata",
   u_: "uwi",
+  f_: "zflddef",
 };
 
 const global_id_keys = ["w_uwi"];

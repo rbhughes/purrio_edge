@@ -8,28 +8,7 @@ const defineSQL = (filter) => {
   let select = `SELECT * FROM (
     WITH w AS (
       SELECT
-        uwi                          AS w_uwi,
-        assigned_field               AS w_assigned_field,
-        common_well_name             AS w_common_well_name,
-        completion_date              AS w_completion_date,
-        country                      AS w_country,
-        county                       AS w_county,
-        current_class                AS w_current_class,
-        current_status               AS w_current_status,
-        depth_datum                  AS w_depth_datum,
-        final_td                     AS w_final_td,
-        ground_elev                  AS w_ground_elev,
-        kb_elev                      AS w_kb_elev,
-        lease_name                   AS w_lease_name,
-        operator                     AS w_operator,
-        province_state               AS w_province_state,
-        row_changed_date             AS w_row_changed_date,
-        spud_date                    AS w_spud_date,
-        surface_latitude             AS w_surface_latitude,
-        surface_longitude            AS w_surface_longitude,
-        td_form                      AS w_td_form,
-        well_name                    AS w_well_name,
-        well_number                  AS w_well_number        
+        uwi                          AS w_uwi
       FROM well
     ),
     v AS (
@@ -186,69 +165,6 @@ const xforms = {
   // WELL
 
   w_uwi: {
-    ts_type: "string",
-  },
-  w_assigned_field: {
-    ts_type: "string",
-  },
-  w_common_well_name: {
-    ts_type: "string",
-  },
-  w_completion_date: {
-    ts_type: "date",
-  },
-  w_country: {
-    ts_type: "string",
-  },
-  w_county: {
-    ts_type: "string",
-  },
-  w_current_class: {
-    ts_type: "string",
-  },
-  w_current_status: {
-    ts_type: "string",
-  },
-  w_depth_datum: {
-    ts_type: "number",
-  },
-  w_final_td: {
-    ts_type: "number",
-  },
-  w_ground_elev: {
-    ts_type: "number",
-  },
-  w_kb_elev: {
-    ts_type: "number",
-  },
-  w_lease_name: {
-    ts_type: "string",
-  },
-  w_operator: {
-    ts_type: "string",
-  },
-  w_province_state: {
-    ts_type: "string",
-  },
-  w_row_changed_date: {
-    ts_type: "date",
-  },
-  w_spud_date: {
-    ts_type: "date",
-  },
-  w_surface_latitude: {
-    ts_type: "number",
-  },
-  w_surface_longitude: {
-    ts_type: "number",
-  },
-  w_td_form: {
-    ts_type: "string",
-  },
-  w_well_name: {
-    ts_type: "string",
-  },
-  w_well_number: {
     ts_type: "string",
   },
 
