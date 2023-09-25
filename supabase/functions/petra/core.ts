@@ -4,7 +4,7 @@ const defineSQL = (filter) => {
   filter = filter ? filter : "";
 
   const where_clause_stub = "__pUrRwHeRe__";
-  const idCols = ["w.wsn", "p.recid"];
+  const idCols = ["w.wsn"];
   const idForm = idCols
     .map((i) => `CAST(${i} AS VARCHAR(10))`)
     .join(` || '-' || `);
@@ -14,25 +14,23 @@ const defineSQL = (filter) => {
   let select = `SELECT
     w.wsn          AS w_wsn,
     w.uwi          AS w_uwi,
-    p.recid        AS p_recid,
-    p.wsn          AS p_wsn,
-    p.flags        AS p_flags,
-    p.date         AS p_date,
-    p.enddate      AS p_enddate,
-    p.top          AS p_top,
-    p.base         AS p_base,
-    p.diameter     AS p_diameter,
-    p.numshots     AS p_numshots,
-    p.method       AS p_method,
-    p.comptype     AS p_comptype,
-    p.perftype     AS p_perftype,
-    p.remark       AS p_remark,
-    p.fmname       AS p_fmname,
-    p.chgdate      AS p_chgdate,
-    p.source       AS p_source
+    LIST(COALESCE(CAST(c.recid AS VARCHAR(10)),    '${N}'), '${D}') AS c_recid,
+    LIST(COALESCE(CAST(c.wsn AS VARCHAR(10)),      '${N}'), '${D}') AS c_wsn,
+    LIST(COALESCE(CAST(c.flags AS VARCHAR(10)),    '${N}'), '${D}') AS c_flags,
+    LIST(COALESCE(CAST(c.lithcode AS VARCHAR(10)), '${N}'), '${D}') AS c_lithcode,
+    LIST(COALESCE(CAST(c.date AS VARCHAR(10)),     '${N}'), '${D}') AS c_date,
+    LIST(COALESCE(CAST(c.top AS VARCHAR(10)),      '${N}'), '${D}') AS c_top,
+    LIST(COALESCE(CAST(c.base AS VARCHAR(10)),     '${N}'), '${D}') AS c_base,
+    LIST(COALESCE(CAST(c.recover AS VARCHAR(10)),  '${N}'), '${D}') AS c_recover,
+    LIST(COALESCE(c.type,                          '${N}'), '${D}') AS c_type,
+    LIST(COALESCE(c.qual,                          '${N}'), '${D}') AS c_qual,
+    LIST(COALESCE(c.fmname,                        '${N}'), '${D}') AS c_fmname,
+    LIST(COALESCE(c.desc,                          '${N}'), '${D}') AS c_desc,
+    LIST(COALESCE(CAST(c.remark AS VARCHAR(512)),  '${N}'), '${D}') AS c_remark
   FROM well w
-  JOIN perfs p ON p.wsn = w.wsn
+  JOIN cores c ON c.wsn = w.wsn
   ${where_clause_stub}
+  GROUP BY w.wsn
   `;
 
   const order = `ORDER BY w_uwi`;
@@ -41,11 +39,12 @@ const defineSQL = (filter) => {
 
   //const fast_count = `SELECT COUNT(DISTINCT uwi) AS count FROM well`;
 
+  // NOTE: key vs keylist (purrio_client batcher figures it out)
   const identifier = `
     SELECT
-      LIST(${idForm}) AS keylist
+      DISTINCT(c.wsn) AS key
     FROM well w
-    JOIN perfs p ON p.wsn = w.wsn
+    JOIN cores c ON w.wsn = c.wsn
     ${where}`;
 
   return {
@@ -57,35 +56,6 @@ const defineSQL = (filter) => {
     order: order,
     where: where,
   };
-};
-
-// There are multiple IP tests per well. We would normally roll them up using
-// LIST aggregation, but each test may contain multiple well treatments
-// (PDTEST.treat), which are stored as BLOBs, one per test. LIST cannot handle
-// BLOBs. Instead, we collect all tests and then aggregate them from the docs.
-const aggregatePDTEST = (docs: Record<string, any>[]) => {
-  const outputDocs: Record<string, any>[] = [];
-  docs.forEach((inputDoc) => {
-    const existingDoc = outputDocs.find(
-      (outputDoc) => outputDoc.doc.well.wsn === inputDoc.doc.well.wsn
-    );
-    if (existingDoc) {
-      existingDoc.doc.pdtest.push(inputDoc.doc.pdtest);
-    } else {
-      outputDocs.push({
-        id: inputDoc.id,
-        well_id: inputDoc.well_id,
-        repo_id: inputDoc.repo_id,
-        geo_type: inputDoc.geo_type,
-        tag: inputDoc.tag,
-        doc: {
-          pdtest: [inputDoc.doc.pdtest],
-          well: inputDoc.doc.well,
-        },
-      });
-    }
-  });
-  return outputDocs;
 };
 
 const xformer = (args) => {
@@ -125,6 +95,17 @@ const xformer = (args) => {
   }
 
   switch (func) {
+    case "delimited_array_with_nulls":
+      return (() => {
+        try {
+          return obj[key]
+            .split(D)
+            .map((v) => (v === N ? null : ensureType(typ, v)));
+        } catch (error) {
+          console.log("ERROR", error);
+          return;
+        }
+      })();
     case "excel_date":
       return (() => {
         try {
@@ -163,64 +144,72 @@ const xforms = {
     ts_type: "string",
   },
 
-  // PDTEST
+    // CORES
+    
+    c_recid: {
+      ts_type: 'number',
+      xform: "delimited_array_with_nulls",
+    },
+    c_wsn: {
+      ts_type: 'number',
+      xform: "delimited_array_with_nulls",
+    },
+    c_flags: {
+      ts_type: 'number',
+      xform: "delimited_array_with_nulls",
+    },
+    c_lithcode: {
+      ts_type: 'number',
+      xform: "delimited_array_with_nulls",
+    },
+    c_date: {
+      ts_type: 'date',
+      xform: 'excel_date'
+      xform: "delimited_array_with_nulls",
+    },
+    c_top: {
+      ts_type: 'number',
+      xform: "delimited_array_with_nulls",
+    },
+    c_base: {
+      ts_type: 'number',
+      xform: "delimited_array_with_nulls",
+    },
+    c_recover: {
+      ts_type: 'number',
+      xform: "delimited_array_with_nulls",
+    },
+    c_type: {
+      ts_type: 'string',
+      xform: "delimited_array_with_nulls",
+    },
+    c_qual: {
+      ts_type: 'string',
+      xform: "delimited_array_with_nulls",
+    },
+    c_fmname: {
+      ts_type: 'string',
+      xform: "delimited_array_with_nulls",
+    },
+    c_desc: {
+      ts_type: 'string',
+      xform: "delimited_array_with_nulls",
+    },
+    c_remark: {
+      ts_type: 'string',
+      xform: 'memo_to_string'
+      xform: "delimited_array_with_nulls",
+    },
 
-  p_recid: {
-    ts_type: "number",
-  },
-  p_wsn: {
-    ts_type: "number",
-  },
-  p_flags: {
-    ts_type: "number",
-  },
-  p_date: {
-    ts_type: "date",
-    xform: "excel_date",
-  },
-  p_enddate: {
-    ts_type: "date",
-    xform: "excel_date",
-  },
-  p_top: {
-    ts_type: "number",
-  },
-  p_base: {
-    ts_type: "number",
-  },
-  p_diameter: {
-    ts_type: "number",
-  },
-  p_numshots: {
-    ts_type: "number",
-  },
-  p_method: {
-    ts_type: "string",
-  },
-  p_comptype: {
-    ts_type: "string",
-  },
-  p_perftype: {
-    ts_type: "string",
-  },
-  p_remark: {
-    xform: "memo_to_string",
-  },
-  p_fmname: {
-    ts_type: "string",
-  },
-  p_chgdate: {
-    ts_type: "date",
-    xform: "excel_date",
-  },
-  p_source: {
-    ts_type: "string",
-  },
 };
 
 const prefixes = {
   w_: "well",
-  p_: "pdtest",
+  s_: "locat",
+  b_: "bhloc",
+  z_: "zdata",
+  u_: "uwi",
+  f_: "zflddef",
 };
 
 const global_id_keys = ["w_uwi"];
@@ -240,9 +229,9 @@ export const getAssetDNA = (filter) => {
     pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
-    serialized_doc_processor: serialize(aggregatePDTEST),
     sql: defineSQL(filter),
     well_id_keys: well_id_keys,
     xforms: xforms,
   };
 };
+
