@@ -4,7 +4,7 @@ const defineSQL = (filter) => {
   filter = filter ? filter : "";
 
   const where_clause_stub = "__pUrRwHeRe__";
-  const idCols = ["w.wsn", "p.recid"];
+  const idCols = ["w.wsn", "f.recid"];
   const idForm = idCols
     .map((i) => `CAST(${i} AS VARCHAR(10))`)
     .join(` || '-' || `);
@@ -14,24 +14,35 @@ const defineSQL = (filter) => {
   let select = `SELECT
     w.wsn          AS w_wsn,
     w.uwi          AS w_uwi,
-    p.recid        AS p_recid,
-    p.wsn          AS p_wsn,
-    p.flags        AS p_flags,
-    p.date         AS p_date,
-    p.enddate      AS p_enddate,
-    p.top          AS p_top,
-    p.base         AS p_base,
-    p.diameter     AS p_diameter,
-    p.numshots     AS p_numshots,
-    p.method       AS p_method,
-    p.comptype     AS p_comptype,
-    p.perftype     AS p_perftype,
-    p.remark       AS p_remark,
-    p.fmname       AS p_fmname,
-    p.chgdate      AS p_chgdate,
-    p.source       AS p_source
+    f.recid        AS f_recid,
+    f.wsn          AS f_wsn,
+    f.numrecov     AS f_numrecov,
+    f.nummts       AS f_nummts,
+    f.flags        AS f_flags,
+    f.date         AS f_date,
+    f.top          AS f_top,
+    f.base         AS f_base,
+    f.ihp          AS f_ihp,
+    f.fhp          AS f_fhp,
+    f.ffp          AS f_ffp,
+    f.isp          AS f_isp,
+    f.fsp          AS f_fsp,
+    f.bht          AS f_bht,
+    f.bhp          AS f_bhp,
+    f.choke        AS f_choke,
+    f.cushamt      AS f_cushamt,
+    f.testtype     AS f_testtype,
+    f.fmname       AS f_fmname,
+    f.cushtype     AS f_cushtype,
+    f.ohtime       AS f_ohtime,
+    f.sitime       AS f_sitime,
+    f.remark       AS f_remark,
+    f.recov        AS f_recov,
+    f.mts          AS f_mts,
+    f.chgdate      AS f_chgdate,
+    f.unitstype    AS f_unitstype
   FROM well w
-  JOIN perfs p ON p.wsn = w.wsn
+  JOIN fmtest f ON f.wsn = w.wsn AND f.testtype = 'D'
   ${where_clause_stub}
   `;
 
@@ -45,7 +56,7 @@ const defineSQL = (filter) => {
     SELECT
       LIST(${idForm}) AS keylist
     FROM well w
-    JOIN perfs p ON p.wsn = w.wsn
+    JOIN fmtest f ON f.wsn = w.wsn AND f.testtype = 'D'
     ${where}`;
 
   return {
@@ -59,18 +70,18 @@ const defineSQL = (filter) => {
   };
 };
 
-// There are multiple IP tests per well. We would normally roll them up using
+// There are multiple DST tests per well. We would normally roll them up using
 // LIST aggregation, but each test may contain multiple well treatments
-// (PDTEST.treat), which are stored as BLOBs, one per test. LIST cannot handle
+// (FMTEST.recov), which are stored as BLOBs, one per test. LIST cannot handle
 // BLOBs. Instead, we collect all tests and then aggregate them from the docs.
-const aggregatePDTEST = (docs: Record<string, any>[]) => {
+const aggregateFMTEST = (docs: Record<string, any>[]) => {
   const outputDocs: Record<string, any>[] = [];
   docs.forEach((inputDoc) => {
     const existingDoc = outputDocs.find(
       (outputDoc) => outputDoc.doc.well.wsn === inputDoc.doc.well.wsn
     );
     if (existingDoc) {
-      existingDoc.doc.pdtest.push(inputDoc.doc.pdtest);
+      existingDoc.doc.fmtest.push(inputDoc.doc.fmtest);
     } else {
       outputDocs.push({
         id: inputDoc.id,
@@ -79,7 +90,7 @@ const aggregatePDTEST = (docs: Record<string, any>[]) => {
         geo_type: inputDoc.geo_type,
         tag: inputDoc.tag,
         doc: {
-          pdtest: [inputDoc.doc.pdtest],
+          fmtest: [inputDoc.doc.fmtest],
           well: inputDoc.doc.well,
         },
       });
@@ -138,6 +149,31 @@ const xformer = (args) => {
           return null;
         }
       })();
+    case "fmtest_recov":
+      return (() => {
+        try {
+          const buf = Buffer.from(obj[key], "binary");
+          const recoveries = [];
+          for (let i = 0; i < buf.length; i += 36) {
+            let treat = {
+              amount: buf.subarray(i, i + 8).readDoubleLE(),
+              units: buf
+                .subarray(i + 8, i + 15)
+                .toString()
+                .split("\x00")[0],
+              descriptions: buf
+                .subarray(i + 15, i + 36)
+                .toString()
+                .split("\x00")[0],
+            };
+            recoveries.push(treat);
+          }
+          return recoveries;
+        } catch (error) {
+          console.log("ERROR", error);
+          return null;
+        }
+      })();
     case "memo_to_string":
       return (() => {
         try {
@@ -163,67 +199,107 @@ const xforms = {
     ts_type: "string",
   },
 
-  // PDTEST
+  // FMTEST
 
-  p_recid: {
+  f_recid: {
     ts_type: "number",
   },
-  p_wsn: {
+  f_wsn: {
     ts_type: "number",
   },
-  p_flags: {
+  f_numrecov: {
     ts_type: "number",
   },
-  p_date: {
+  f_nummts: {
+    ts_type: "number",
+  },
+  f_flags: {
+    ts_type: "number",
+  },
+  f_date: {
     ts_type: "date",
     xform: "excel_date",
   },
-  p_enddate: {
-    ts_type: "date",
-    xform: "excel_date",
-  },
-  p_top: {
+  f_top: {
     ts_type: "number",
   },
-  p_base: {
+  f_base: {
     ts_type: "number",
   },
-  p_diameter: {
+
+  f_ihp: {
     ts_type: "number",
   },
-  p_numshots: {
+  f_fhp: {
     ts_type: "number",
   },
-  p_method: {
+  f_ifp: {
+    ts_type: "number",
+  },
+  f_ffp: {
+    ts_type: "number",
+  },
+  f_isp: {
+    ts_type: "number",
+  },
+  f_fsp: {
+    ts_type: "number",
+  },
+  f_bht: {
+    ts_type: "number",
+  },
+  f_bhp: {
+    ts_type: "number",
+  },
+  f_choke: {
+    ts_type: "number",
+  },
+  f_cushamt: {
+    ts_type: "number",
+  },
+  f_testtype: {
     ts_type: "string",
   },
-  p_comptype: {
+  f_fmname: {
     ts_type: "string",
   },
-  p_perftype: {
+  f_cushtype: {
     ts_type: "string",
   },
-  p_remark: {
+  f_ohtime: {
+    ts_type: "string",
+  },
+  f_sitime: {
+    ts_type: "string",
+  },
+  f_remark: {
+    ts_type: "number",
     xform: "memo_to_string",
   },
-  p_fmname: {
+  f_recov: {
     ts_type: "string",
+    xform: "fmtest_recov",
   },
-  p_chgdate: {
+  // TODO: decipher what mts BLOB contains, if anything
+  f_mts: {
+    ts_type: "string",
+    xform: "memo_to_string",
+  },
+  f_chgdate: {
     ts_type: "date",
     xform: "excel_date",
   },
-  p_source: {
-    ts_type: "string",
+  f_unitstype: {
+    ts_type: "number",
   },
 };
 
 const prefixes = {
   w_: "well",
-  p_: "pdtest",
+  f_: "fmtest",
 };
 
-const global_id_keys = ["w_uwi", "p_recid"];
+const global_id_keys = ["w_uwi", "f_recid"];
 
 const well_id_keys = ["w_uwi"];
 
@@ -240,7 +316,7 @@ export const getAssetDNA = (filter) => {
     pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
-    serialized_doc_processor: serialize(aggregatePDTEST),
+    serialized_doc_processor: serialize(aggregateFMTEST),
     sql: defineSQL(filter),
     well_id_keys: well_id_keys,
     xforms: xforms,

@@ -3,6 +3,8 @@ import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 const defineSQL = (filter) => {
   filter = filter ? filter : "";
 
+  const D = "|&|";
+  const N = "purrNULL";
   const where_clause_stub = "__pUrRwHeRe__";
   const idCols = ["w.wsn"];
   const idForm = idCols
@@ -90,6 +92,9 @@ const xformer = (args) => {
     }
   };
 
+  const D = "|&|";
+  const N = "purrNULL";
+
   if (obj[key] == null) {
     return null;
   }
@@ -106,10 +111,41 @@ const xformer = (args) => {
           return;
         }
       })();
+    case "delimited_array_of_memo":
+      return (() => {
+        const localX = (v) => {
+          const buf = Buffer.from(v, "binary");
+          return ensureType("string", buf.toString("utf-8"));
+        };
+
+        try {
+          return obj[key].split(D).map((v) => (v === N ? null : localX(v)));
+        } catch (error) {
+          console.log("ERROR", error);
+          return;
+        }
+      })();
+    case "delimited_array_of_excel_dates":
+      return (() => {
+        const localX = (v) => {
+          if (v.toString().match(/1[eE]\+?30/i)) {
+            return null;
+          }
+          const d = new Date(Math.round((v - 25569) * 86400 * 1000));
+          return d.toISOString();
+        };
+
+        try {
+          return obj[key].split(D).map((v) => (v === N ? null : localX(v)));
+        } catch (error) {
+          console.log("ERROR", error);
+          return;
+        }
+      })();
     case "excel_date":
       return (() => {
         try {
-          if (obj[key] === 1e30) {
+          if (obj[key].toString().match(/1[eE]\+?30/i)) {
             return null;
           }
           const d = new Date(Math.round((obj[key] - 25569) * 86400 * 1000));
@@ -144,72 +180,65 @@ const xforms = {
     ts_type: "string",
   },
 
-    // CORES
-    
-    c_recid: {
-      ts_type: 'number',
-      xform: "delimited_array_with_nulls",
-    },
-    c_wsn: {
-      ts_type: 'number',
-      xform: "delimited_array_with_nulls",
-    },
-    c_flags: {
-      ts_type: 'number',
-      xform: "delimited_array_with_nulls",
-    },
-    c_lithcode: {
-      ts_type: 'number',
-      xform: "delimited_array_with_nulls",
-    },
-    c_date: {
-      ts_type: 'date',
-      xform: 'excel_date'
-      xform: "delimited_array_with_nulls",
-    },
-    c_top: {
-      ts_type: 'number',
-      xform: "delimited_array_with_nulls",
-    },
-    c_base: {
-      ts_type: 'number',
-      xform: "delimited_array_with_nulls",
-    },
-    c_recover: {
-      ts_type: 'number',
-      xform: "delimited_array_with_nulls",
-    },
-    c_type: {
-      ts_type: 'string',
-      xform: "delimited_array_with_nulls",
-    },
-    c_qual: {
-      ts_type: 'string',
-      xform: "delimited_array_with_nulls",
-    },
-    c_fmname: {
-      ts_type: 'string',
-      xform: "delimited_array_with_nulls",
-    },
-    c_desc: {
-      ts_type: 'string',
-      xform: "delimited_array_with_nulls",
-    },
-    c_remark: {
-      ts_type: 'string',
-      xform: 'memo_to_string'
-      xform: "delimited_array_with_nulls",
-    },
+  // CORES
 
+  c_recid: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_wsn: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_flags: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_lithcode: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_date: {
+    ts_type: "date",
+    xform: "delimited_array_of_excel_dates",
+  },
+  c_top: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_base: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_recover: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  c_type: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_qual: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_fmname: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_desc: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
+  },
+  c_remark: {
+    ts_type: "string",
+    xform: "delimited_array_of_memo",
+  },
 };
 
 const prefixes = {
   w_: "well",
-  s_: "locat",
-  b_: "bhloc",
-  z_: "zdata",
-  u_: "uwi",
-  f_: "zflddef",
+  c_: "cores",
 };
 
 const global_id_keys = ["w_uwi"];
@@ -234,4 +263,3 @@ export const getAssetDNA = (filter) => {
     xforms: xforms,
   };
 };
-

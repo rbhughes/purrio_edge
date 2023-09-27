@@ -208,7 +208,7 @@ const xformer = (args) => {
     case "excel_date":
       return (() => {
         try {
-          if (obj[key] === 1e30) {
+          if (obj[key].toString().match(/1[eE]\+?30/i)) {
             return null;
           }
           const d = new Date(Math.round((obj[key] - 25569) * 86400 * 1000));
