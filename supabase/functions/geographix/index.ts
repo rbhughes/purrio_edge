@@ -33,10 +33,6 @@ const vault = {
 serve(async (req) => {
   let { asset, filter } = await req.json();
 
-  //const data = {
-  //  message: `Hello ${asset}!`,
-  //}
-
   const getDNA = vault[asset];
 
   const data = getDNA(filter);
