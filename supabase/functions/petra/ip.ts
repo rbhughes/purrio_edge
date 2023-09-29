@@ -16,22 +16,37 @@ const defineSQL = (filter) => {
     w.uwi          AS w_uwi,
     p.recid        AS p_recid,
     p.wsn          AS p_wsn,
+    p.numtreat     AS p_numtreat,
     p.flags        AS p_flags,
     p.date         AS p_date,
-    p.enddate      AS p_enddate,
     p.top          AS p_top,
     p.base         AS p_base,
-    p.diameter     AS p_diameter,
-    p.numshots     AS p_numshots,
-    p.method       AS p_method,
-    p.comptype     AS p_comptype,
-    p.perftype     AS p_perftype,
-    p.remark       AS p_remark,
+    p.oilvol       AS p_oilvol,
+    p.gasvol       AS p_gasvol,
+    p.wtrvol       AS p_wtrvol,
+    p.ftp          AS p_ftp,
+    p.fcp          AS p_fcp,
+    p.stp          AS p_stp,
+    p.scp          AS p_scp,
+    p.bht          AS p_bht,
+    p.bhp          AS p_bhp,
+    p.choke        AS p_choke,
+    p.duration     AS p_duration,
+    p.caof         AS p_caof,
+    p.oilgty       AS p_oilgty,
+    p.gasgty       AS p_gasgty,
+    p.gor          AS p_gor,
+    p.testtype     AS p_testtype,
     p.fmname       AS p_fmname,
+    p.oilunit      AS p_oilunit,
+    p.gasunit      AS p_gasunit,
+    p.wtrunit      AS p_wtrunit,
+    p.remark       AS p_remark,
+    p.treat        AS p_treat,
     p.chgdate      AS p_chgdate,
-    p.source       AS p_source
+    p.unitstype    AS p_unitstype
   FROM well w
-  JOIN perfs p ON p.wsn = w.wsn
+  JOIN pdtest p ON p.wsn = w.wsn
   ${where_clause_stub}
   `;
 
@@ -45,7 +60,7 @@ const defineSQL = (filter) => {
     SELECT
       LIST(${idForm}) AS keylist
     FROM well w
-    JOIN perfs p ON p.wsn = w.wsn
+    JOIN pdtest p ON p.wsn = w.wsn
     ${where}`;
 
   return {
@@ -59,18 +74,18 @@ const defineSQL = (filter) => {
   };
 };
 
-// There are multiple IP tests per well. We would normally roll them up using
+// There are multiple DST tests per well. We would normally roll them up using
 // LIST aggregation, but each test may contain multiple well treatments
-// (PERFS.treat), which are stored as BLOBs, one per test. LIST cannot handle
+// (FMTEST.recov), which are stored as BLOBs, one per test. LIST cannot handle
 // BLOBs. Instead, we collect all tests and then aggregate them from the docs.
-const aggregatePERFS = (docs: Record<string, any>[]) => {
+const aggregatePDTEST = (docs: Record<string, any>[]) => {
   const outputDocs: Record<string, any>[] = [];
   docs.forEach((inputDoc) => {
     const existingDoc = outputDocs.find(
       (outputDoc) => outputDoc.doc.well.wsn === inputDoc.doc.well.wsn
     );
     if (existingDoc) {
-      existingDoc.doc.perfs.push(inputDoc.doc.perfs);
+      existingDoc.doc.pdtest.push(inputDoc.doc.pdtest);
     } else {
       outputDocs.push({
         id: inputDoc.id,
@@ -79,7 +94,7 @@ const aggregatePERFS = (docs: Record<string, any>[]) => {
         geo_type: inputDoc.geo_type,
         tag: inputDoc.tag,
         doc: {
-          perfs: [inputDoc.doc.perfs],
+          pdtest: [inputDoc.doc.pdtest],
           well: inputDoc.doc.well,
         },
       });
@@ -138,6 +153,53 @@ const xformer = (args) => {
           return null;
         }
       })();
+    case "pdtest_treat":
+      return (() => {
+        try {
+          const buf = Buffer.from(obj[key], "binary");
+          const treatments = [];
+          for (let i = 0; i < buf.length; i += 110) {
+            let treat = {
+              type: buf
+                .subarray(i, i + 9)
+                .toString()
+                .split("\x00")[0],
+              top: buf.subarray(i + 9, i + 17).readDoubleLE(),
+              base: buf.subarray(i + 17, i + 25).readDoubleLE(),
+              amount1: buf.subarray(i + 25, i + 33).readDoubleLE(),
+              units1: buf
+                .subarray(i + 61, i + 65)
+                .toString()
+                .split("\x00")[0],
+              desc: buf
+                .subarray(i + 68, i + 89)
+                .toString()
+                .split("\x00")[0],
+              agent: buf
+                .subarray(i + 89, i + 96)
+                .toString()
+                .split("\x00")[0],
+              amount2: buf.subarray(i + 33, i + 41).readDoubleLE(),
+              units2: buf
+                .subarray(i + 96, i + 100)
+                .toString()
+                .split("\x00")[0],
+              fmbrk: buf.subarray(i + 41, i + 50).readDoubleLE(),
+              num_stages: buf.subarray(i + 57, i + 61).readInt32LE(),
+              additive: buf
+                .subarray(i + 103, i + 110)
+                .toString()
+                .split("\x00")[0],
+              inj_rate: buf.subarray(i + 49, i + 57).readDoubleLE(),
+            };
+            treatments.push(treat);
+          }
+          return treatments;
+        } catch (error) {
+          console.log("ERROR", error);
+          return null;
+        }
+      })();
     case "memo_to_string":
       return (() => {
         try {
@@ -163,12 +225,15 @@ const xforms = {
     ts_type: "string",
   },
 
-  // PERFS
+  // PDTEST
 
   p_recid: {
     ts_type: "number",
   },
   p_wsn: {
+    ts_type: "number",
+  },
+  p_numtreat: {
     ts_type: "number",
   },
   p_flags: {
@@ -178,49 +243,92 @@ const xforms = {
     ts_type: "date",
     xform: "excel_date",
   },
-  p_enddate: {
-    ts_type: "date",
-    xform: "excel_date",
-  },
   p_top: {
     ts_type: "number",
   },
   p_base: {
     ts_type: "number",
   },
-  p_diameter: {
+  p_oilvol: {
     ts_type: "number",
   },
-  p_numshots: {
+  p_gasvol: {
     ts_type: "number",
   },
-  p_method: {
-    ts_type: "string",
+  p_wtrvol: {
+    ts_type: "number",
   },
-  p_comptype: {
-    ts_type: "string",
+  p_ftp: {
+    ts_type: "number",
   },
-  p_perftype: {
-    ts_type: "string",
+  p_fcp: {
+    ts_type: "number",
   },
-  p_remark: {
-    xform: "memo_to_string",
+  p_stp: {
+    ts_type: "number",
+  },
+  p_scp: {
+    ts_type: "number",
+  },
+  p_bht: {
+    ts_type: "number",
+  },
+  p_bhp: {
+    ts_type: "number",
+  },
+  p_choke: {
+    ts_type: "number",
+  },
+  p_duration: {
+    ts_type: "number",
+  },
+  p_caof: {
+    ts_type: "number",
+  },
+  p_oilgty: {
+    ts_type: "number",
+  },
+  p_gasgty: {
+    ts_type: "number",
+  },
+  p_gor: {
+    ts_type: "number",
+  },
+  p_testtype: {
+    ts_type: "string",
   },
   p_fmname: {
     ts_type: "string",
+  },
+  p_oilunit: {
+    ts_type: "string",
+  },
+  p_gasunit: {
+    ts_type: "string",
+  },
+  p_wtrunit: {
+    ts_type: "string",
+  },
+  p_remark: {
+    ts_type: "number",
+    xform: "memo_to_string",
+  },
+  p_treat: {
+    ts_type: "string",
+    xform: "pdtest_treat",
   },
   p_chgdate: {
     ts_type: "date",
     xform: "excel_date",
   },
-  p_source: {
-    ts_type: "string",
+  p_unitstype: {
+    ts_type: "number",
   },
 };
 
 const prefixes = {
   w_: "well",
-  p_: "perfs",
+  p_: "pdtest",
 };
 
 const global_id_keys = ["w_uwi", "p_recid"];
@@ -240,7 +348,7 @@ export const getAssetDNA = (filter) => {
     pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
-    serialized_doc_processor: serialize(aggregatePERFS),
+    serialized_doc_processor: serialize(aggregatePDTEST),
     sql: defineSQL(filter),
     well_id_keys: well_id_keys,
     xforms: xforms,

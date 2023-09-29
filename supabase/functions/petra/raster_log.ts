@@ -4,7 +4,7 @@ const defineSQL = (filter) => {
   filter = filter ? filter : "";
 
   const where_clause_stub = "__pUrRwHeRe__";
-  const idCols = ["w.wsn", "p.recid"];
+  const idCols = ["w.wsn", "i.ign"];
   const idForm = idCols
     .map((i) => `CAST(${i} AS VARCHAR(10))`)
     .join(` || '-' || `);
@@ -12,26 +12,21 @@ const defineSQL = (filter) => {
   const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
 
   let select = `SELECT
-    w.wsn          AS w_wsn,
-    w.uwi          AS w_uwi,
-    p.recid        AS p_recid,
-    p.wsn          AS p_wsn,
-    p.flags        AS p_flags,
-    p.date         AS p_date,
-    p.enddate      AS p_enddate,
-    p.top          AS p_top,
-    p.base         AS p_base,
-    p.diameter     AS p_diameter,
-    p.numshots     AS p_numshots,
-    p.method       AS p_method,
-    p.comptype     AS p_comptype,
-    p.perftype     AS p_perftype,
-    p.remark       AS p_remark,
-    p.fmname       AS p_fmname,
-    p.chgdate      AS p_chgdate,
-    p.source       AS p_source
+    w.wsn           AS w_wsn,
+    w.uwi           AS w_uwi,
+    i.wsn           AS i_wsn,
+    i.ign           AS i_ign,
+    i.flags         AS i_flags,
+    i.imagefilename AS i_imagefilename,
+    i.calibfilename AS i_calibfilename,
+    g.ign           AS g_ign,
+    g.flags         AS g_flags,
+    g.groupname     AS g_groupname,
+    g.desc          AS g_desc,
+    g.path          AS g_path
   FROM well w
-  JOIN perfs p ON p.wsn = w.wsn
+  JOIN logimage i ON w.wsn = i.wsn
+  LEFT OUTER JOIN logimgrp g ON i.ign = g.ign
   ${where_clause_stub}
   `;
 
@@ -43,10 +38,12 @@ const defineSQL = (filter) => {
 
   const identifier = `
     SELECT
-      LIST(${idForm}) AS keylist
+      LIST(${idForm}) as keylist
     FROM well w
-    JOIN perfs p ON p.wsn = w.wsn
-    ${where}`;
+    JOIN logimage i ON w.wsn = i.wsn
+    LEFT OUTER JOIN logimgrp g ON i.ign = g.ign
+    ${where}
+    `;
 
   return {
     identifier: identifier,
@@ -57,35 +54,6 @@ const defineSQL = (filter) => {
     order: order,
     where: where,
   };
-};
-
-// There are multiple IP tests per well. We would normally roll them up using
-// LIST aggregation, but each test may contain multiple well treatments
-// (PERFS.treat), which are stored as BLOBs, one per test. LIST cannot handle
-// BLOBs. Instead, we collect all tests and then aggregate them from the docs.
-const aggregatePERFS = (docs: Record<string, any>[]) => {
-  const outputDocs: Record<string, any>[] = [];
-  docs.forEach((inputDoc) => {
-    const existingDoc = outputDocs.find(
-      (outputDoc) => outputDoc.doc.well.wsn === inputDoc.doc.well.wsn
-    );
-    if (existingDoc) {
-      existingDoc.doc.perfs.push(inputDoc.doc.perfs);
-    } else {
-      outputDocs.push({
-        id: inputDoc.id,
-        well_id: inputDoc.well_id,
-        repo_id: inputDoc.repo_id,
-        geo_type: inputDoc.geo_type,
-        tag: inputDoc.tag,
-        doc: {
-          perfs: [inputDoc.doc.perfs],
-          well: inputDoc.doc.well,
-        },
-      });
-    }
-  });
-  return outputDocs;
 };
 
 const xformer = (args) => {
@@ -138,16 +106,6 @@ const xformer = (args) => {
           return null;
         }
       })();
-    case "memo_to_string":
-      return (() => {
-        try {
-          const buf = Buffer.from(obj[key], "binary");
-          return ensureType("string", buf.toString("utf-8"));
-        } catch (error) {
-          console.log("ERROR", error);
-          return null;
-        }
-      })();
     default:
       return ensureType(typ, obj[key]);
   }
@@ -163,67 +121,50 @@ const xforms = {
     ts_type: "string",
   },
 
-  // PERFS
+  // LOGIMAGE
 
-  p_recid: {
+  i_wsn: {
     ts_type: "number",
   },
-  p_wsn: {
+  i_ign: {
     ts_type: "number",
   },
-  p_flags: {
+  i_flags: {
     ts_type: "number",
   },
-  p_date: {
-    ts_type: "date",
-    xform: "excel_date",
-  },
-  p_enddate: {
-    ts_type: "date",
-    xform: "excel_date",
-  },
-  p_top: {
-    ts_type: "number",
-  },
-  p_base: {
-    ts_type: "number",
-  },
-  p_diameter: {
-    ts_type: "number",
-  },
-  p_numshots: {
-    ts_type: "number",
-  },
-  p_method: {
+  i_imagefilename: {
     ts_type: "string",
   },
-  p_comptype: {
+  i_calibfilename: {
     ts_type: "string",
   },
-  p_perftype: {
+
+  // LOGIMGRP
+
+  g_ign: {
+    ts_type: "number",
+  },
+  g_flags: {
+    ts_type: "number",
+  },
+  g_groupname: {
     ts_type: "string",
   },
-  p_remark: {
-    xform: "memo_to_string",
-  },
-  p_fmname: {
+  g_desc: {
     ts_type: "string",
   },
-  p_chgdate: {
-    ts_type: "date",
-    xform: "excel_date",
-  },
-  p_source: {
+  g_path: {
     ts_type: "string",
   },
 };
 
 const prefixes = {
   w_: "well",
-  p_: "perfs",
+  i_: "logimage",
+  g_: "logimgrp",
 };
 
-const global_id_keys = ["w_uwi", "p_recid"];
+const global_id_keys = ["w_uwi", "i_ign"];
 
 const well_id_keys = ["w_uwi"];
 
@@ -240,7 +181,6 @@ export const getAssetDNA = (filter) => {
     pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
-    serialized_doc_processor: serialize(aggregatePERFS),
     sql: defineSQL(filter),
     well_id_keys: well_id_keys,
     xforms: xforms,

@@ -8,6 +8,10 @@ import { getAssetDNA as completion_dna } from "./completion.ts";
 import { getAssetDNA as core_dna } from "./core.ts";
 import { getAssetDNA as dst_dna } from "./dst.ts";
 import { getAssetDNA as formation_dna } from "./formation.ts";
+import { getAssetDNA as ip_dna } from "./ip.ts";
+import { getAssetDNA as production_dna } from "./production.ts";
+import { getAssetDNA as raster_log_dna } from "./raster_log.ts";
+import { getAssetDNA as survey_dna } from "./survey.ts";
 import { getAssetDNA as well_dna } from "./well.ts";
 
 const vault = {
@@ -15,6 +19,10 @@ const vault = {
   core: core_dna,
   dst: dst_dna,
   formation: formation_dna,
+  ip: ip_dna,
+  production: production_dna,
+  raster_log: raster_log_dna,
+  survey: survey_dna,
   well: well_dna,
 };
 
