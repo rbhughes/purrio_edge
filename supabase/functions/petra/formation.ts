@@ -7,7 +7,7 @@ const defineSQL = (filter) => {
   //const N = "purrNULL";
 
   const where_clause_stub = "__pUrRwHeRe__";
-  const idCols = ["w.wsn", "z.fid"];
+  const idCols = ["w.wsn", "f.fid"];
   const idForm = idCols
     .map((i) => `CAST(${i} AS VARCHAR(10))`)
     .join(` || '-' || `);
@@ -17,6 +17,7 @@ const defineSQL = (filter) => {
   let select = `SELECT
     w.wsn          AS w_wsn,
     w.uwi          AS w_uwi,
+
     f.fid          AS f_fid,
     f.zid          AS f_zid,
     f.name         AS f_name,
@@ -30,6 +31,7 @@ const defineSQL = (filter) => {
     f.remarks      AS f_remarks,
     f.flags        AS f_flags,
     f.unitstype    AS f_unitstype,
+
     z.fid          AS z_fid,
     z.wsn          AS z_wsn,
     z.zid          AS z_zid,
@@ -42,6 +44,7 @@ const defineSQL = (filter) => {
     z.text         AS z_text,
     z.datalen      AS z_datalen,
     z.data         AS z_data,
+
     t.recid        AS t_recid,
     t.wsn          AS t_wsn,
     t.fid          AS t_fid,
@@ -54,6 +57,7 @@ const defineSQL = (filter) => {
     t.chgdate      AS t_chgdate,
     t.data         AS t_data,
     CAST(t.remarks AS VARCHAR(512)) AS t_remarks
+
   FROM zflddef f
   JOIN zdata z ON f.fid = z.fid
     AND f.kind = 'T'
@@ -67,10 +71,6 @@ const defineSQL = (filter) => {
 
   const order = `ORDER BY w_uwi`;
 
-  const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT uwi) AS count FROM well`;
-
   const identifier = `
     SELECT
       LIST(${idForm}) as keylist
@@ -82,17 +82,15 @@ const defineSQL = (filter) => {
       AND z.z IS NOT NULL
     LEFT OUTER JOIN zztops t ON t.wsn = z.wsn AND t.fid = z.fid
     JOIN well w ON z.wsn = w.wsn 
-
     ${where}`;
 
   return {
-    identifier: identifier,
     id_cols: idCols,
-    where_clause_stub: where_clause_stub,
-    select: select,
-    count: count,
+    identifier: identifier,
     order: order,
+    select: select,
     where: where,
+    where_clause_stub: where_clause_stub,
   };
 };
 
@@ -107,10 +105,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -318,7 +314,7 @@ const xforms = {
     xform: "excel_date",
   },
   t_data: {
-    ts_type: "string", // stored as json for now
+    ts_type: "string", // actually json
     xform: "zztops_data",
   },
   t_remarks: {
@@ -333,21 +329,18 @@ const prefixes = {
   t_: "zztops",
 };
 
-const global_id_keys = ["w_uwi", "f_fid"];
+const asset_id_keys = ["w_uwi", "f_fid"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
-
 const default_chunk = 1000;
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
+    asset_id_keys: asset_id_keys,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

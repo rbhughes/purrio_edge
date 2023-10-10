@@ -1,10 +1,11 @@
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
-// ignored:
-// fault.fault_id
-// r_source.source
+// ignored: fault.fault_id, r_source.source
 
 const defineSQL = (filter) => {
+  const D = "|&|";
+  const N = "purrNULL";
+
   filter = filter ? filter : "";
 
   const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
@@ -14,73 +15,77 @@ const defineSQL = (filter) => {
       SELECT
         uwi                       AS w_uwi
       FROM well
+    ),
+    f AS (
+      SELECT
+        uwi                       AS id_f_uwi,
+        LIST(IFNULL(dominant_lithology,      '${N}', CAST(dominant_lithology AS VARCHAR)),      '${D}' ORDER BY form_obs_no) AS f_dominant_lithology,
+        LIST(IFNULL(fault_name,              '${N}', CAST(fault_name AS VARCHAR)),              '${D}' ORDER BY form_obs_no) AS f_fault_name,
+        LIST(IFNULL(faulted_ind,             '${N}', CAST(faulted_ind AS VARCHAR)),             '${D}' ORDER BY form_obs_no) AS f_faulted_ind,
+        LIST(IFNULL(form_depth,              '${N}', CAST(form_depth AS VARCHAR)),              '${D}' ORDER BY form_obs_no) AS f_form_depth,
+        LIST(IFNULL(form_id,                 '${N}', CAST(form_id AS VARCHAR)),                 '${D}' ORDER BY form_obs_no) AS f_form_id,
+        LIST(IFNULL(form_obs_no,             '${N}', CAST(form_obs_no AS VARCHAR)),             '${D}' ORDER BY form_obs_no) AS f_form_obs_no,
+        LIST(IFNULL(form_tvd,                '${N}', CAST(form_tvd AS VARCHAR)),                '${D}' ORDER BY form_obs_no) AS f_form_tvd,
+        LIST(IFNULL(gap_thickness,           '${N}', CAST(gap_thickness AS VARCHAR)),           '${D}' ORDER BY form_obs_no) AS f_gap_thickness,
+        LIST(IFNULL(gx_base_subsea,          '${N}', CAST(gx_base_subsea AS VARCHAR)),          '${D}' ORDER BY form_obs_no) AS f_gx_base_subsea,
+        LIST(IFNULL(gx_dip,                  '${N}', CAST(gx_dip AS VARCHAR)),                  '${D}' ORDER BY form_obs_no) AS f_gx_dip,
+        LIST(IFNULL(gx_dip_azimuth,          '${N}', CAST(gx_dip_azimuth AS VARCHAR)),          '${D}' ORDER BY form_obs_no) AS f_gx_dip_azimuth,
+        LIST(IFNULL(gx_eroded_ind,           '${N}', CAST(gx_eroded_ind AS VARCHAR)),           '${D}' ORDER BY form_obs_no) AS f_gx_eroded_ind,
+        LIST(IFNULL(gx_exten_id,             '${N}', CAST(gx_exten_id AS VARCHAR)),             '${D}' ORDER BY form_obs_no) AS f_gx_exten_id,
+        LIST(IFNULL(gx_form_base_depth,      '${N}', CAST(gx_form_base_depth AS VARCHAR)),      '${D}' ORDER BY form_obs_no) AS f_gx_form_base_depth,
+        LIST(IFNULL(gx_form_base_tvd,        '${N}', CAST(gx_form_base_tvd AS VARCHAR)),        '${D}' ORDER BY form_obs_no) AS f_gx_form_base_tvd,
+        LIST(IFNULL(gx_form_depth_datum,     '${N}', CAST(gx_form_depth_datum AS VARCHAR)),     '${D}' ORDER BY form_obs_no) AS f_gx_form_depth_datum,
+        LIST(IFNULL(gx_form_id_alias,        '${N}', CAST(gx_form_id_alias AS VARCHAR)),        '${D}' ORDER BY form_obs_no) AS f_gx_form_id_alias,
+        LIST(IFNULL(gx_form_top_depth,       '${N}', CAST(gx_form_top_depth AS VARCHAR)),       '${D}' ORDER BY form_obs_no) AS f_gx_form_top_depth,
+        LIST(IFNULL(gx_form_top_tvd,         '${N}', CAST(gx_form_top_tvd AS VARCHAR)),         '${D}' ORDER BY form_obs_no) AS f_gx_form_top_tvd,
+        LIST(IFNULL(gx_form_x_coordinate,    '${N}', CAST(gx_form_x_coordinate AS VARCHAR)),    '${D}' ORDER BY form_obs_no) AS f_gx_form_x_coordinate,
+        LIST(IFNULL(gx_form_y_coordinate,    '${N}', CAST(gx_form_y_coordinate AS VARCHAR)),    '${D}' ORDER BY form_obs_no) AS f_gx_form_y_coordinate,
+        LIST(IFNULL(gx_gross_thickness,      '${N}', CAST(gx_gross_thickness AS VARCHAR)),      '${D}' ORDER BY form_obs_no) AS f_gx_gross_thickness,
+        LIST(IFNULL(gx_internal_no,          '${N}', CAST(gx_internal_no AS VARCHAR)),          '${D}' ORDER BY form_obs_no) AS f_gx_internal_no,
+        LIST(IFNULL(gx_net_thickness,        '${N}', CAST(gx_net_thickness AS VARCHAR)),        '${D}' ORDER BY form_obs_no) AS f_gx_net_thickness,
+        LIST(IFNULL(gx_porosity,             '${N}', CAST(gx_porosity AS VARCHAR)),             '${D}' ORDER BY form_obs_no) AS f_gx_porosity,
+        LIST(IFNULL(gx_show,                 '${N}', CAST(gx_show AS VARCHAR)),                 '${D}' ORDER BY form_obs_no) AS f_gx_show,
+        LIST(IFNULL(gx_strat_column,         '${N}', CAST(gx_strat_column AS VARCHAR)),         '${D}' ORDER BY form_obs_no) AS f_gx_strat_column,
+        LIST(IFNULL(gx_top_subsea,           '${N}', CAST(gx_top_subsea AS VARCHAR)),           '${D}' ORDER BY form_obs_no) AS f_gx_top_subsea,
+        LIST(IFNULL(gx_true_strat_thickness, '${N}', CAST(gx_true_strat_thickness AS VARCHAR)), '${D}' ORDER BY form_obs_no) AS f_gx_true_strat_thickness,
+        LIST(IFNULL(gx_true_vert_thickness,  '${N}', CAST(gx_true_vert_thickness AS VARCHAR)),  '${D}' ORDER BY form_obs_no) AS f_gx_true_vert_thickness,
+        LIST(IFNULL(gx_user1,                '${N}', CAST(gx_user1 AS VARCHAR)),                '${D}' ORDER BY form_obs_no) AS f_gx_user1,
+        LIST(IFNULL(gx_user2,                '${N}', CAST(gx_user2 AS VARCHAR)),                '${D}' ORDER BY form_obs_no) AS f_gx_user2,
+        LIST(IFNULL(gx_user3,                '${N}', CAST(gx_user3 AS VARCHAR)),                '${D}' ORDER BY form_obs_no) AS f_gx_user3,
+        LIST(IFNULL(gx_user4,                '${N}', CAST(gx_user4 AS VARCHAR)),                '${D}' ORDER BY form_obs_no) AS f_gx_user4,
+        LIST(IFNULL(gx_user5,                '${N}', CAST(gx_user5 AS VARCHAR)),                '${D}' ORDER BY form_obs_no) AS f_gx_user5,
+        LIST(IFNULL(gx_user6,                '${N}', CAST(gx_user6 AS VARCHAR)),                '${D}' ORDER BY form_obs_no) AS f_gx_user6,
+        LIST(IFNULL(gx_vendor_no,            '${N}', CAST(gx_vendor_no AS VARCHAR)),            '${D}' ORDER BY form_obs_no) AS f_gx_vendor_no,
+        LIST(IFNULL(gx_wellbore_angle,       '${N}', CAST(gx_wellbore_angle AS VARCHAR)),       '${D}' ORDER BY form_obs_no) AS f_gx_wellbore_angle,
+        LIST(IFNULL(gx_wellbore_azimuth,     '${N}', CAST(gx_wellbore_azimuth AS VARCHAR)),     '${D}' ORDER BY form_obs_no) AS f_gx_wellbore_azimuth,
+        LIST(IFNULL(percent_thickness,       '${N}', CAST(percent_thickness AS VARCHAR)),       '${D}' ORDER BY form_obs_no) AS f_percent_thickness,
+        LIST(IFNULL(pick_location,           '${N}', CAST(pick_location AS VARCHAR)),           '${D}' ORDER BY form_obs_no) AS f_pick_location,
+        LIST(IFNULL(pick_qualifier,          '${N}', CAST(pick_qualifier AS VARCHAR)),          '${D}' ORDER BY form_obs_no) AS f_pick_qualifier,
+        LIST(IFNULL(pick_quality,            '${N}', CAST(pick_quality AS VARCHAR)),            '${D}' ORDER BY form_obs_no) AS f_pick_quality,
+        LIST(IFNULL(pick_type,               '${N}', CAST(pick_type AS VARCHAR)),               '${D}' ORDER BY form_obs_no) AS f_pick_type,
+        LIST(IFNULL(public,                  '${N}', CAST(public AS VARCHAR)),                  '${D}' ORDER BY form_obs_no) AS f_public,
+        LIST(IFNULL(remark,                  '${N}', CAST(remark AS VARCHAR)),                  '${D}' ORDER BY form_obs_no) AS f_remark,
+        LIST(IFNULL(row_changed_date,        '${N}', CAST(row_changed_date AS VARCHAR)),        '${D}' ORDER BY form_obs_no) AS f_row_changed_date,
+        LIST(IFNULL(source,                  '${N}', CAST(source AS VARCHAR)),                  '${D}' ORDER BY form_obs_no) AS f_source,
+        LIST(IFNULL(unc_fault_obs_no,        '${N}', CAST(unc_fault_obs_no AS VARCHAR)),        '${D}' ORDER BY form_obs_no) AS f_unc_fault_obs_no,
+        LIST(IFNULL(unc_fault_source,        '${N}', CAST(unc_fault_source AS VARCHAR)),        '${D}' ORDER BY form_obs_no) AS f_unc_fault_source,
+        LIST(IFNULL(unconformity_name,       '${N}', CAST(unconformity_name AS VARCHAR)),       '${D}' ORDER BY form_obs_no) AS f_unconformity_name,
+        LIST(IFNULL(uwi,                     '${N}', CAST(uwi AS VARCHAR)),                     '${D}' ORDER BY form_obs_no) AS f_uwi
+      FROM well_formation
+      GROUP BY uwi
     )
     SELECT 
       w.*,
-      f.dominant_lithology        AS f_dominant_lithology,
-      f.fault_name                AS f_fault_name,
-      f.faulted_ind               AS f_faulted_ind,
-      f.form_depth                AS f_form_depth,
-      f.form_id                   AS f_form_id,
-      f.form_obs_no               AS f_form_obs_no,
-      f.form_tvd                  AS f_form_tvd,
-      f.gap_thickness             AS f_gap_thickness,
-      f.gx_base_subsea            AS f_gx_base_subsea,
-      f.gx_dip                    AS f_gx_dip,
-      f.gx_dip_azimuth            AS f_gx_dip_azimuth,
-      f.gx_eroded_ind             AS f_gx_eroded_ind,
-      f.gx_exten_id               AS f_gx_exten_id,
-      f.gx_form_base_depth        AS f_gx_form_base_depth,
-      f.gx_form_base_tvd          AS f_gx_form_base_tvd,
-      f.gx_form_depth_datum       AS f_gx_form_depth_datum,
-      f.gx_form_id_alias          AS f_gx_form_id_alias,
-      f.gx_form_top_depth         AS f_gx_form_top_depth,
-      f.gx_form_top_tvd           AS f_gx_form_top_tvd,
-      f.gx_form_x_coordinate      AS f_gx_form_x_coordinate,
-      f.gx_form_y_coordinate      AS f_gx_form_y_coordinate,
-      f.gx_gross_thickness        AS f_gx_gross_thickness,
-      f.gx_internal_no            AS f_gx_internal_no,
-      f.gx_net_thickness          AS f_gx_net_thickness,
-      f.gx_porosity               AS f_gx_porosity,
-      f.gx_show                   AS f_gx_show,
-      f.gx_strat_column           AS f_gx_strat_column,
-      f.gx_top_subsea             AS f_gx_top_subsea,
-      f.gx_true_strat_thickness   AS f_gx_true_strat_thickness,
-      f.gx_true_vert_thickness    AS f_gx_true_vert_thickness,
-      f.gx_user1                  AS f_gx_user1,
-      f.gx_user2                  AS f_gx_user2,
-      f.gx_user3                  AS f_gx_user3,
-      f.gx_user4                  AS f_gx_user4,
-      f.gx_user5                  AS f_gx_user5,
-      f.gx_user6                  AS f_gx_user6,
-      f.gx_vendor_no              AS f_gx_vendor_no,
-      f.gx_wellbore_angle         AS f_gx_wellbore_angle,
-      f.gx_wellbore_azimuth       AS f_gx_wellbore_azimuth,
-      f.percent_thickness         AS f_percent_thickness,
-      f.pick_location             AS f_pick_location,
-      f.pick_qualifier            AS f_pick_qualifier,
-      f.pick_quality              AS f_pick_quality,
-      f.pick_type                 AS f_pick_type,
-      f.public                    AS f_public,
-      f.public                    AS m_public,
-      f.remark                    AS f_remark,
-      f.row_changed_date          AS f_row_changed_date,
-      f.source                    AS f_source,
-      f.unc_fault_obs_no          AS f_unc_fault_obs_no,
-      f.unc_fault_source          AS f_unc_fault_source,
-      f.unconformity_name         AS f_unconformity_name,
-      f.unconformity_name         AS m_unconformity_name,
-      f.uwi                       AS f_uwi
-    FROM well_formation f
-    JOIN w ON
-      f.uwi = w.w_uwi AND coalesce(f.gx_form_top_depth, f.gx_form_base_depth) IS NOT NULL
+      f.*
+    FROM w
+    JOIN f ON
+      f.id_f_uwi = w.w_uwi
     ) x`;
 
+  //const order = `ORDER BY w_uwi, f_form_id, f_form_obs_no, f_source`;
   const order = `ORDER BY w_uwi`;
 
   const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT uwi) AS count FROM well`;
 
   return {
     select: select,
@@ -91,6 +96,9 @@ const defineSQL = (filter) => {
 };
 
 const xformer = (args) => {
+  const D = "|&|";
+  const N = "purrNULL";
+
   let { func, key, typ, arg, obj } = args;
 
   const ensureType = (type: string, val: any) => {
@@ -101,10 +109,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -127,10 +133,12 @@ const xformer = (args) => {
   }
 
   switch (func) {
-    case "nobody":
+    case "delimited_array_with_nulls":
       return (() => {
         try {
-          return Buffer.from(obj[key]).toString("hex");
+          return obj[key]
+            .split(D)
+            .map((v) => (v === N ? null : ensureType(typ, v)));
         } catch (error) {
           console.log("ERROR", error);
           return;
@@ -150,194 +158,238 @@ const xforms = {
 
   // WELL_FORMATION
 
+  id_f_uwi: {
+    ts_type: "string",
+  },
+
   f_dominant_lithology: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_fault_name: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_faulted_ind: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_form_depth: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_form_id: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_form_obs_no: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_form_tvd: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gap_thickness: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_base_subsea: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_dip: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_dip_azimuth: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_eroded_ind: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_exten_id: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_form_base_depth: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_form_base_tvd: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_form_depth_datum: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_form_id_alias: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_form_top_depth: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_form_top_tvd: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_form_x_coordinate: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_form_y_coordinate: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_gross_thickness: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_internal_no: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_net_thickness: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_porosity: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_show: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_strat_column: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_top_subsea: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_true_strat_thickness: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_true_vert_thickness: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_user1: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_user2: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_user3: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_user4: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_user5: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_user6: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_vendor_no: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_wellbore_angle: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_gx_wellbore_azimuth: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_percent_thickness: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_pick_location: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_pick_qualifier: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_pick_quality: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_pick_type: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_public: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_remark: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_row_changed_date: {
     ts_type: "date",
+    xform: "delimited_array_with_nulls",
   },
   f_source: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_unc_fault_obs_no: {
     ts_type: "number",
+    xform: "delimited_array_with_nulls",
   },
   f_unc_fault_source: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_unconformity_name: {
     ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   f_uwi: {
     ts_type: "string",
-  },
-
-  // FORMATION
-
-  m_public: {
-    ts_type: "string",
-  },
-  m_unconformity_name: {
-    ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
 };
 
 const prefixes = {
   w_: "well",
   f_: "well_formation",
-  m_: "formation",
 };
 
-const global_id_keys = ["w_uwi", "f_form_id", "f_form_obs_no", "f_source"];
+//const asset_id_keys = ["w_uwi", "f_form_id", "f_form_obs_no", "f_source"];
+const asset_id_keys = ["w_uwi"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
+const default_chunk = 100;
 
-const default_chunk = 1000;
-
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
+    asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

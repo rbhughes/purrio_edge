@@ -14,6 +14,7 @@ const defineSQL = (filter) => {
   let select = `SELECT
     w.wsn          AS w_wsn,
     w.uwi          AS w_uwi,
+
     a.ldsn         AS a_ldsn,
     a.wsn          AS a_wsn,
     a.lsn          AS a_lsn,
@@ -33,6 +34,7 @@ const defineSQL = (filter) => {
     a.source       AS a_source,
     a.digits       AS a_digits,
     a.remarks      AS a_remarks,
+
     f.lsn          AS f_lsn,
     f.logname      AS f_logname,
     f.desc         AS f_desc,
@@ -40,6 +42,7 @@ const defineSQL = (filter) => {
     f.servid       AS f_servid,
     f.remarks      AS f_remarks,
     f.flags        AS f_flags,
+
     x.ldsn         AS x_ldsn,
     x.wsn          AS x_wsn,
     x.lsn          AS x_lsn,
@@ -47,6 +50,7 @@ const defineSQL = (filter) => {
     x.adddate      AS x_adddate,
     x.chgdate      AS x_chgdate,
     x.lasid        AS x_lasid,
+
     s.lasid        AS s_lasid,
     s.wsn          AS s_wsn,
     s.flags        AS s_flags,
@@ -54,6 +58,7 @@ const defineSQL = (filter) => {
     s.chgdate      AS s_chgdate,
     s.hdrsize      AS s_hdrsize,
     s.lashdr       AS s_lashdr
+
   FROM well w
   JOIN logdata a ON w.wsn = a.wsn
   JOIN logdef f ON a.lsn = f.lsn
@@ -63,10 +68,6 @@ const defineSQL = (filter) => {
   `;
 
   const order = `ORDER BY w_uwi, a_ldsn`;
-
-  const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT uwi) AS count FROM well`;
 
   const identifier = `
     SELECT
@@ -80,13 +81,12 @@ const defineSQL = (filter) => {
     `;
 
   return {
-    identifier: identifier,
     id_cols: idCols,
-    where_clause_stub: where_clause_stub,
-    select: select,
-    count: count,
+    identifier: identifier,
     order: order,
+    select: select,
     where: where,
+    where_clause_stub: where_clause_stub,
   };
 };
 
@@ -101,10 +101,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -342,21 +340,18 @@ const prefixes = {
   s_: "loglas",
 };
 
-const global_id_keys = ["w_uwi", "a_ldsn"];
+const asset_id_keys = ["w_uwi", "a_ldsn"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
-
 const default_chunk = 1000;
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
+    asset_id_keys: asset_id_keys,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

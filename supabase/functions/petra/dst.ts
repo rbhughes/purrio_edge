@@ -14,6 +14,7 @@ const defineSQL = (filter) => {
   let select = `SELECT
     w.wsn          AS w_wsn,
     w.uwi          AS w_uwi,
+
     f.recid        AS f_recid,
     f.wsn          AS f_wsn,
     f.numrecov     AS f_numrecov,
@@ -41,16 +42,13 @@ const defineSQL = (filter) => {
     f.mts          AS f_mts,
     f.chgdate      AS f_chgdate,
     f.unitstype    AS f_unitstype
+
   FROM well w
   JOIN fmtest f ON f.wsn = w.wsn AND f.testtype = 'D'
   ${where_clause_stub}
   `;
 
   const order = `ORDER BY w_uwi`;
-
-  const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT uwi) AS count FROM well`;
 
   const identifier = `
     SELECT
@@ -60,13 +58,12 @@ const defineSQL = (filter) => {
     ${where}`;
 
   return {
-    identifier: identifier,
     id_cols: idCols,
-    where_clause_stub: where_clause_stub,
-    select: select,
-    count: count,
+    identifier: identifier,
     order: order,
+    select: select,
     where: where,
+    where_clause_stub: where_clause_stub,
   };
 };
 
@@ -110,10 +107,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -299,21 +294,18 @@ const prefixes = {
   f_: "fmtest",
 };
 
-const global_id_keys = ["w_uwi", "f_recid"];
+const asset_id_keys = ["w_uwi", "f_recid"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
-
 const default_chunk = 1000;
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
+    asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     serialized_doc_processor: serialize(aggregateFMTEST),

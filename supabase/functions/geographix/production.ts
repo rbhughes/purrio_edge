@@ -11,14 +11,92 @@ const defineSQL = (filter) => {
   let select = `SELECT * FROM (
     WITH w AS (
       SELECT
-        uwi                        AS w_uwi
+        uwi                              AS w_uwi
       FROM well
+    ),
+    p AS (
+      SELECT
+        activity_type                    AS p_activity_type,
+        average_co2_volume               AS p_average_co2_volume,
+        average_gas_volume               AS p_average_gas_volume,
+        average_injection_volume         AS p_average_injection_volume,
+        average_ngl_volume               AS p_average_ngl_volume,
+        average_nitrogen_volume          AS p_average_nitrogen_volume,
+        average_oil_volume               AS p_average_oil_volume,
+        average_sulphur_volume           AS p_average_sulphur_volume,
+        average_total_fluids_volume      AS p_average_total_fluids_volume,
+        average_water_volume             AS p_average_water_volume,
+        cumulative_co2_volume            AS p_cumulative_co2_volume,
+        cumulative_gas_volume            AS p_cumulative_gas_volume,
+        cumulative_injection_volume      AS p_cumulative_injection_volume,
+        cumulative_ngl_volume            AS p_cumulative_ngl_volume,
+        cumulative_nitrogen_volume       AS p_cumulative_nitrogen_volume,
+        cumulative_oil_volume            AS p_cumulative_oil_volume,
+        cumulative_sulphur_volume        AS p_cumulative_sulphur_volume,
+        cumulative_total_fluids_volume   AS p_cumulative_total_fluids_volume,
+        cumulative_water_volume          AS p_cumulative_water_volume,
+        first_co2_volume                 AS p_first_co2_volume,
+        first_gas_volume                 AS p_first_gas_volume,
+        first_gas_volume_date            AS p_first_gas_volume_date,
+        first_injection_volume           AS p_first_injection_volume,
+        first_ngl_volume                 AS p_first_ngl_volume,
+        first_nitrogen_volume            AS p_first_nitrogen_volume,
+        first_oil_volume                 AS p_first_oil_volume,
+        first_oil_volume_date            AS p_first_oil_volume_date,
+        first_sulphur_volume             AS p_first_sulphur_volume,
+        first_total_fluids_date          AS p_first_total_fluids_date,
+        first_total_fluids_volume        AS p_first_total_fluids_volume,
+        first_water_volume               AS p_first_water_volume,
+        first_water_volume_date          AS p_first_water_volume_date,
+        gas_eur                          AS p_gas_eur,
+        gas_reserves                     AS p_gas_reserves,
+        gx_percent_allocation            AS p_gx_percent_allocation,
+        last_co2_volume                  AS p_last_co2_volume,
+        last_gas_volume                  AS p_last_gas_volume,
+        last_gas_volume_date             AS p_last_gas_volume_date,
+        last_injection_volume            AS p_last_injection_volume,
+        last_ngl_volume                  AS p_last_ngl_volume,
+        last_nitrogen_volume             AS p_last_nitrogen_volume,
+        last_oil_volume                  AS p_last_oil_volume,
+        last_oil_volume_date             AS p_last_oil_volume_date,
+        last_sulphur_volume              AS p_last_sulphur_volume,
+        last_total_fluids_date           AS p_last_total_fluids_date,
+        last_total_fluids_volume         AS p_last_total_fluids_volume,
+        last_water_volume                AS p_last_water_volume,
+        last_water_volume_date           AS p_last_water_volume_date,
+        max_co2_volume                   AS p_max_co2_volume,
+        max_gas_volume                   AS p_max_gas_volume,
+        max_injection_volume             AS p_max_injection_volume,
+        max_ngl_volume                   AS p_max_ngl_volume,
+        max_nitrogen_volume              AS p_max_nitrogen_volume,
+        max_oil_volume                   AS p_max_oil_volume,
+        max_sulphur_volume               AS p_max_sulphur_volume,
+        max_total_fluids_volume          AS p_max_total_fluids_volume,
+        max_water_volume                 AS p_max_water_volume,
+        min_co2_volume                   AS p_min_co2_volume,
+        min_gas_volume                   AS p_min_gas_volume,
+        min_injection_volume             AS p_min_injection_volume,
+        min_ngl_volume                   AS p_min_ngl_volume,
+        min_nitrogen_volume              AS p_min_nitrogen_volume,
+        min_oil_volume                   AS p_min_oil_volume,
+        min_sulphur_volume               AS p_min_sulphur_volume,
+        min_total_fluids_volume          AS p_min_total_fluids_volume,
+        min_water_volume                 AS p_min_water_volume,
+        oil_eur                          AS p_oil_eur,
+        oil_reserves                     AS p_oil_reserves,
+        row_changed_date                 AS p_row_changed_date,
+        uwi                              AS p_uwi,
+        volume_method                    AS p_volume_method,
+        zone_id                          AS p_zone_id
+      FROM well_cumulative_production
     ),
     m AS (
       SELECT
-        uwi AS m_uwi,
-        pden_source AS r_source,
-        LIST(IFNULL(uwi,                   '${N}', uwi),                                    '${D}') AS a_m_uwi,
+        uwi                              AS id_m_uwi,
+        zone_id                          AS id_m_zone_id,
+        activity_type                    AS id_m_activity_type,
+        volume_method                    AS id_m_volume_method,
+        LIST(IFNULL(uwi,                   '${N}', uwi),                                    '${D}') AS m_uwi,
         LIST(IFNULL(activity_type,         '${N}', activity_type),                          '${D}') AS m_activity_type,
         LIST(IFNULL(pden_date,             '${N}', CAST(pden_date AS VARCHAR)),             '${D}') AS m_pden_date,
         LIST(IFNULL(pden_source,           '${N}', pden_source),                            '${D}') AS m_pden_source,
@@ -81,90 +159,20 @@ const defineSQL = (filter) => {
     SELECT 
       w.*,
       m.*,
-      p.activity_type                    AS p_activity_type,
-      p.average_co2_volume               AS p_average_co2_volume,
-      p.average_gas_volume               AS p_average_gas_volume,
-      p.average_injection_volume         AS p_average_injection_volume,
-      p.average_ngl_volume               AS p_average_ngl_volume,
-      p.average_nitrogen_volume          AS p_average_nitrogen_volume,
-      p.average_oil_volume               AS p_average_oil_volume,
-      p.average_sulphur_volume           AS p_average_sulphur_volume,
-      p.average_total_fluids_volume      AS p_average_total_fluids_volume,
-      p.average_water_volume             AS p_average_water_volume,
-      p.cumulative_co2_volume            AS p_cumulative_co2_volume,
-      p.cumulative_gas_volume            AS p_cumulative_gas_volume,
-      p.cumulative_injection_volume      AS p_cumulative_injection_volume,
-      p.cumulative_ngl_volume            AS p_cumulative_ngl_volume,
-      p.cumulative_nitrogen_volume       AS p_cumulative_nitrogen_volume,
-      p.cumulative_oil_volume            AS p_cumulative_oil_volume,
-      p.cumulative_sulphur_volume        AS p_cumulative_sulphur_volume,
-      p.cumulative_total_fluids_volume   AS p_cumulative_total_fluids_volume,
-      p.cumulative_water_volume          AS p_cumulative_water_volume,
-      p.first_co2_volume                 AS p_first_co2_volume,
-      p.first_gas_volume                 AS p_first_gas_volume,
-      p.first_gas_volume_date            AS p_first_gas_volume_date,
-      p.first_injection_volume           AS p_first_injection_volume,
-      p.first_ngl_volume                 AS p_first_ngl_volume,
-      p.first_nitrogen_volume            AS p_first_nitrogen_volume,
-      p.first_oil_volume                 AS p_first_oil_volume,
-      p.first_oil_volume_date            AS p_first_oil_volume_date,
-      p.first_sulphur_volume             AS p_first_sulphur_volume,
-      p.first_total_fluids_date          AS p_first_total_fluids_date,
-      p.first_total_fluids_volume        AS p_first_total_fluids_volume,
-      p.first_water_volume               AS p_first_water_volume,
-      p.first_water_volume_date          AS p_first_water_volume_date,
-      p.gas_eur                          AS p_gas_eur,
-      p.gas_reserves                     AS p_gas_reserves,
-      p.gx_percent_allocation            AS p_gx_percent_allocation,
-      p.last_co2_volume                  AS p_last_co2_volume,
-      p.last_gas_volume                  AS p_last_gas_volume,
-      p.last_gas_volume_date             AS p_last_gas_volume_date,
-      p.last_injection_volume            AS p_last_injection_volume,
-      p.last_ngl_volume                  AS p_last_ngl_volume,
-      p.last_nitrogen_volume             AS p_last_nitrogen_volume,
-      p.last_oil_volume                  AS p_last_oil_volume,
-      p.last_oil_volume_date             AS p_last_oil_volume_date,
-      p.last_sulphur_volume              AS p_last_sulphur_volume,
-      p.last_total_fluids_date           AS p_last_total_fluids_date,
-      p.last_total_fluids_volume         AS p_last_total_fluids_volume,
-      p.last_water_volume                AS p_last_water_volume,
-      p.last_water_volume_date           AS p_last_water_volume_date,
-      p.max_co2_volume                   AS p_max_co2_volume,
-      p.max_gas_volume                   AS p_max_gas_volume,
-      p.max_injection_volume             AS p_max_injection_volume,
-      p.max_ngl_volume                   AS p_max_ngl_volume,
-      p.max_nitrogen_volume              AS p_max_nitrogen_volume,
-      p.max_oil_volume                   AS p_max_oil_volume,
-      p.max_sulphur_volume               AS p_max_sulphur_volume,
-      p.max_total_fluids_volume          AS p_max_total_fluids_volume,
-      p.max_water_volume                 AS p_max_water_volume,
-      p.min_co2_volume                   AS p_min_co2_volume,
-      p.min_gas_volume                   AS p_min_gas_volume,
-      p.min_injection_volume             AS p_min_injection_volume,
-      p.min_ngl_volume                   AS p_min_ngl_volume,
-      p.min_nitrogen_volume              AS p_min_nitrogen_volume,
-      p.min_oil_volume                   AS p_min_oil_volume,
-      p.min_sulphur_volume               AS p_min_sulphur_volume,
-      p.min_total_fluids_volume          AS p_min_total_fluids_volume,
-      p.min_water_volume                 AS p_min_water_volume,
-      p.oil_eur                          AS p_oil_eur,
-      p.oil_reserves                     AS p_oil_reserves,
-      p.row_changed_date                 AS p_row_changed_date,
-      p.uwi                              AS p_uwi,
-      p.volume_method                    AS p_volume_method,
-      p.zone_id                          AS p_zone_id
-    FROM well_cumulative_production p     
-    JOIN w ON
-      p.uwi = w.w_uwi
+      p.*
+    FROM w   
+    JOIN p ON
+      p.p_uwi = w.w_uwi
     JOIN m ON
-      p.uwi = m.m_uwi
+      m.m_uwi = w.w_uwi AND
+      m.id_m_zone_id = p.p_zone_id AND
+      m.id_m_activity_type = p.p_activity_type AND
+      m.id_m_volume_method = p.p_volume_method
     ) x`;
 
   const order = `ORDER BY w_uwi`;
 
   const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT wellid) AS count FROM gx_well_curve`;
 
   return {
     select: select,
@@ -175,6 +183,9 @@ const defineSQL = (filter) => {
 };
 
 const xformer = (args) => {
+  const D = "|&|";
+  const N = "purrNULL";
+
   let { func, key, typ, arg, obj } = args;
 
   const ensureType = (type: string, val: any) => {
@@ -185,10 +196,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -205,9 +214,6 @@ const xformer = (args) => {
       return "XFORM ME";
     }
   };
-
-  const D = "|&|";
-  const N = "purrNULL";
 
   if (obj[key] == null) {
     return null;
@@ -239,11 +245,21 @@ const xforms = {
 
   // GX_PDEN_VOL_SUM_BY_MONTH
 
-  m_uwi: {
+  id_m_uwi: {
     ts_type: "string",
   },
-  a_m_uwi: {
+  id_m_zone_id: {
     ts_type: "string",
+  },
+  id_m_activity_type: {
+    ts_type: "string",
+  },
+  id_m_volume_method: {
+    ts_type: "string",
+  },
+  m_uwi: {
+    ts_type: "string",
+    xform: "delimited_array_with_nulls",
   },
   m_activity_type: {
     ts_type: "string",
@@ -703,21 +719,18 @@ const prefixes = {
   r_: "r_source",
 };
 
-const global_id_keys = ["w_uwi"];
+const asset_id_keys = ["w_uwi"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
+const default_chunk = 100;
 
-const default_chunk = 500;
-
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
+    asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

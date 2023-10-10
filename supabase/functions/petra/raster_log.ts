@@ -14,16 +14,19 @@ const defineSQL = (filter) => {
   let select = `SELECT
     w.wsn           AS w_wsn,
     w.uwi           AS w_uwi,
+
     i.wsn           AS i_wsn,
     i.ign           AS i_ign,
     i.flags         AS i_flags,
     i.imagefilename AS i_imagefilename,
     i.calibfilename AS i_calibfilename,
+
     g.ign           AS g_ign,
     g.flags         AS g_flags,
     g.groupname     AS g_groupname,
     g.desc          AS g_desc,
     g.path          AS g_path
+
   FROM well w
   JOIN logimage i ON w.wsn = i.wsn
   LEFT OUTER JOIN logimgrp g ON i.ign = g.ign
@@ -31,10 +34,6 @@ const defineSQL = (filter) => {
   `;
 
   const order = `ORDER BY w_uwi`;
-
-  const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT uwi) AS count FROM well`;
 
   const identifier = `
     SELECT
@@ -46,13 +45,12 @@ const defineSQL = (filter) => {
     `;
 
   return {
-    identifier: identifier,
     id_cols: idCols,
-    where_clause_stub: where_clause_stub,
-    select: select,
-    count: count,
+    identifier: identifier,
     order: order,
+    select: select,
     where: where,
+    where_clause_stub: where_clause_stub,
   };
 };
 
@@ -67,10 +65,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -93,7 +89,7 @@ const xformer = (args) => {
   }
 
   switch (func) {
-    case "excel_date":
+    case "nobody": // no match possible, but ensure switch compatibility
       return (() => {
         try {
           if (obj[key].toString().match(/1[eE]\+?30/i)) {
@@ -164,21 +160,18 @@ const prefixes = {
   g_: "logimgrp",
 };
 
-const global_id_keys = ["w_uwi", "i_ign"];
+const asset_id_keys = ["w_uwi", "i_ign"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
-
 const default_chunk = 1000;
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
+    asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

@@ -18,6 +18,7 @@ const defineSQL = (filter) => {
   let select = `SELECT
     w.wsn          AS w_wsn,
     w.uwi          AS w_uwi,
+
     f.mid          AS f_mid,
     f.name         AS f_name,
     f.desc         AS f_desc,
@@ -26,6 +27,7 @@ const defineSQL = (filter) => {
     f.nullvalue    AS f_nullvalue,
     f.unitstype    AS f_unitstype,
     f.chgdate      AS f_chgdate,
+
     LIST(COALESCE(CAST(a.recid AS VARCHAR(10)),   '${N}'), '${D}') AS a_recid,
     LIST(COALESCE(CAST(a.wsn AS VARCHAR(10)),     '${N}'), '${D}') AS a_wsn,
     LIST(COALESCE(CAST(a.mid AS VARCHAR(10)),     '${N}'), '${D}') AS a_mid,
@@ -45,6 +47,7 @@ const defineSQL = (filter) => {
     LIST(COALESCE(CAST(a.nov AS VARCHAR(10)),     '${N}'), '${D}') AS a_nov,
     LIST(COALESCE(CAST(a.dec AS VARCHAR(10)),     '${N}'), '${D}') AS a_dec,
     LIST(COALESCE(CAST(a.chgdate AS VARCHAR(10)), '${N}'), '${D}') AS a_chgdate
+
   FROM mopddef f
   JOIN mopddata a ON a.mid = f.mid
   JOIN well w ON a.wsn = w.wsn
@@ -54,11 +57,7 @@ const defineSQL = (filter) => {
 
   const order = `ORDER BY w_uwi`;
 
-  const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT uwi) AS count FROM well`;
-
-  // NOTE: key vs keylist (purrio_client batcher figures it out)
+  // NOTE: key, not keylist
   const identifier = `
     SELECT
       ${idForm} AS key
@@ -70,17 +69,19 @@ const defineSQL = (filter) => {
     `;
 
   return {
-    identifier: identifier,
     id_cols: idCols,
-    where_clause_stub: where_clause_stub,
-    select: select,
-    count: count,
+    identifier: identifier,
     order: order,
+    select: select,
     where: where,
+    where_clause_stub: where_clause_stub,
   };
 };
 
 const xformer = (args) => {
+  const D = "|&|";
+  const N = "purrNULL";
+
   let { func, key, typ, arg, obj } = args;
 
   const ensureType = (type: string, val: any) => {
@@ -91,10 +92,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -111,9 +110,6 @@ const xformer = (args) => {
       return "XFORM ME";
     }
   };
-
-  const D = "|&|";
-  const N = "purrNULL";
 
   if (obj[key] == null) {
     return null;
@@ -290,21 +286,18 @@ const prefixes = {
   a_: "mopddata",
 };
 
-const global_id_keys = ["w_uwi", "f_mid"];
+const asset_id_keys = ["w_uwi", "f_mid"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
+const default_chunk = 100;
 
-const default_chunk = 1000;
-
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
+    asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

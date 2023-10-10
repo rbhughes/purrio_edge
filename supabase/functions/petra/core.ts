@@ -16,6 +16,7 @@ const defineSQL = (filter) => {
   let select = `SELECT
     w.wsn          AS w_wsn,
     w.uwi          AS w_uwi,
+
     LIST(COALESCE(CAST(c.recid AS VARCHAR(10)),    '${N}'), '${D}') AS c_recid,
     LIST(COALESCE(CAST(c.wsn AS VARCHAR(10)),      '${N}'), '${D}') AS c_wsn,
     LIST(COALESCE(CAST(c.flags AS VARCHAR(10)),    '${N}'), '${D}') AS c_flags,
@@ -29,6 +30,7 @@ const defineSQL = (filter) => {
     LIST(COALESCE(c.fmname,                        '${N}'), '${D}') AS c_fmname,
     LIST(COALESCE(c.desc,                          '${N}'), '${D}') AS c_desc,
     LIST(COALESCE(CAST(c.remark AS VARCHAR(512)),  '${N}'), '${D}') AS c_remark
+
   FROM well w
   JOIN cores c ON c.wsn = w.wsn
   ${where_clause_stub}
@@ -37,11 +39,7 @@ const defineSQL = (filter) => {
 
   const order = `ORDER BY w_uwi`;
 
-  const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT uwi) AS count FROM well`;
-
-  // NOTE: key vs keylist (purrio_client batcher figures it out)
+  // NOTE: key, not keylist
   const identifier = `
     SELECT
       DISTINCT(c.wsn) AS key
@@ -50,17 +48,19 @@ const defineSQL = (filter) => {
     ${where}`;
 
   return {
-    identifier: identifier,
     id_cols: idCols,
-    where_clause_stub: where_clause_stub,
-    select: select,
-    count: count,
+    identifier: identifier,
     order: order,
+    select: select,
     where: where,
+    where_clause_stub: where_clause_stub,
   };
 };
 
 const xformer = (args) => {
+  const D = "|&|";
+  const N = "purrNULL";
+
   let { func, key, typ, arg, obj } = args;
 
   const ensureType = (type: string, val: any) => {
@@ -71,10 +71,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -91,9 +89,6 @@ const xformer = (args) => {
       return "XFORM ME";
     }
   };
-
-  const D = "|&|";
-  const N = "purrNULL";
 
   if (obj[key] == null) {
     return null;
@@ -140,29 +135,6 @@ const xformer = (args) => {
         } catch (error) {
           console.log("ERROR", error);
           return;
-        }
-      })();
-    case "excel_date":
-      return (() => {
-        try {
-          if (obj[key].toString().match(/1[eE]\+?30/i)) {
-            return null;
-          }
-          const d = new Date(Math.round((obj[key] - 25569) * 86400 * 1000));
-          return d.toISOString();
-        } catch (error) {
-          console.log("ERROR", error);
-          return null;
-        }
-      })();
-    case "memo_to_string":
-      return (() => {
-        try {
-          const buf = Buffer.from(obj[key], "binary");
-          return ensureType("string", buf.toString("utf-8"));
-        } catch (error) {
-          console.log("ERROR", error);
-          return null;
         }
       })();
     default:
@@ -241,21 +213,18 @@ const prefixes = {
   c_: "cores",
 };
 
-const global_id_keys = ["w_uwi"];
+const asset_id_keys = ["w_uwi"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
-
 const default_chunk = 1000;
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
+    asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

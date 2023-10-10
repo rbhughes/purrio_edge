@@ -12,72 +12,70 @@ const defineSQL = (filter) => {
         uwi               AS w_uwi
       FROM well
     ),
-    wc AS (
+    c AS (
       SELECT 
-        wellid            AS wc_wellid,
-        curveset          AS wc_curveset,
-        curvename         AS wc_curvename,
-        version           AS wc_version,
-        cmd_type          AS wc_cmd_type,
-        curve_uom         AS wc_curve_uom,
-        curve_ouom        AS wc_curve_ouom,
-        date_modified     AS wc_date_modified,
-        description       AS wc_description,
-        tool_type         AS wc_tool_type,
-        remark            AS wc_remark,
-        topdepth          AS wc_topdepth,
-        basedepth         AS wc_basedepth
+        wellid            AS c_wellid,
+        curveset          AS c_curveset,
+        curvename         AS c_curvename,
+        version           AS c_version,
+        cmd_type          AS c_cmd_type,
+        curve_uom         AS c_curve_uom,
+        curve_ouom        AS c_curve_ouom,
+        date_modified     AS c_date_modified,
+        description       AS c_description,
+        tool_type         AS c_tool_type,
+        remark            AS c_remark,
+        topdepth          AS c_topdepth,
+        basedepth         AS c_basedepth
       FROM gx_well_curve
     ),
-    wcs AS (
+    s AS (
       SELECT
-        wellid            AS wcs_wellid,
-        curveset          AS wcs_curveset,
-        topdepth          AS wcs_topdepth,
-        basedepth         AS wcs_basedepth,
-        depthincr         AS wcs_depthincr,
-        log_job           AS wcs_log_job,
-        log_trip          AS wcs_log_trip,
-        source_file       AS wcs_source_file,
-        remark            AS wcs_remark,
-        type              AS wcs_type,
-        fielddata         AS wcs_fielddata,
-        [import date]     AS wcs_import_date
+        wellid            AS s_wellid,
+        curveset          AS s_curveset,
+        topdepth          AS s_topdepth,
+        basedepth         AS s_basedepth,
+        depthincr         AS s_depthincr,
+        log_job           AS s_log_job,
+        log_trip          AS s_log_trip,
+        source_file       AS s_source_file,
+        remark            AS s_remark,
+        type              AS s_type,
+        fielddata         AS s_fielddata,
+        [import date]     AS s_import_date
       FROM gx_well_curveset
     ),
-    wcv AS (
+    v AS (
       SELECT
-        wellid            AS wcv_wellid,
-        curveset          AS wcv_curveset,
-        curvename         AS wcv_curvename,
-        version           AS wcv_version,
-        curve_values      AS wcv_curve_values,
-        curve_values      AS wcv_curve_values_orig
+        wellid            AS v_wellid,
+        curveset          AS v_curveset,
+        curvename         AS v_curvename,
+        version           AS v_version,
+        curve_values      AS v_curve_values,
+        curve_values      AS v_curve_values_orig
       FROM gx_well_curve_values
     )
     SELECT
       w.*,
-      wc.*,
-      wcs.*,
-      wcv.*
+      c.*,
+      s.*,
+      v.*
     FROM w
-    JOIN wc ON
-      w.w_uwi = wc.wc_wellid
-    JOIN wcv ON
-      wc.wc_wellid = wcv.wcv_wellid AND 
-      wc.wc_curveset = wcv.wcv_curveset AND 
-      wc.wc_curvename = wcv.wcv_curvename AND 
-      wc.wc_version = wcv.wcv_version
-    JOIN wcs ON
-      wc.wc_wellid = wcs.wcs_wellid AND 
-      wc.wc_curveset = wcs.wcs_curveset
+    JOIN c ON
+      w.w_uwi = c.c_wellid
+    JOIN v ON
+      c.c_wellid = v.v_wellid AND 
+      c.c_curveset = v.v_curveset AND 
+      c.c_curvename = v.v_curvename AND 
+      c.c_version = v.v_version
+    JOIN s ON
+      c.c_wellid = s.s_wellid AND 
+      c.c_curveset = s.s_curveset
     ) x`;
 
-  const order = `ORDER BY w_uwi, wc_curveset, wc_curvename, wc_version`;
+  const order = `ORDER BY w_uwi, c_curveset, c_curvename, c_version`;
 
   const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT wellid) AS count FROM gx_well_curve`;
 
   return {
     select: select,
@@ -98,10 +96,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -162,131 +158,128 @@ const xforms = {
 
   // GX_WELL_CURVE
 
-  wc_basedepth: {
+  c_basedepth: {
     ts_type: "number",
   },
-  wc_cmd_type: {
+  c_cmd_type: {
     ts_type: "string",
   },
-  wc_curve_ouom: {
+  c_curve_ouom: {
     ts_type: "string",
   },
-  wc_curve_uom: {
+  c_curve_uom: {
     ts_type: "string",
   },
-  wc_curvename: {
+  c_curvename: {
     ts_type: "string",
   },
-  wc_curveset: {
+  c_curveset: {
     ts_type: "string",
   },
-  wc_date_modified: {
+  c_date_modified: {
     ts_type: "date",
   },
-  wc_description: {
+  c_description: {
     ts_type: "string",
   },
-  wc_remark: {
+  c_remark: {
     ts_type: "string",
   },
-  wc_tool_type: {
+  c_tool_type: {
     ts_type: "string",
   },
-  wc_topdepth: {
+  c_topdepth: {
     ts_type: "number",
   },
-  wc_version: {
+  c_version: {
     ts_type: "number",
   },
-  wc_wellid: {
+  c_wellid: {
     ts_type: "string",
   },
 
   // GX_WELL_CURVESET
 
-  wcs_basedepth: {
+  s_basedepth: {
     ts_type: "number",
   },
-  wcs_curveset: {
+  s_curveset: {
     ts_type: "string",
   },
-  wcs_depthincr: {
+  s_depthincr: {
     ts_type: "number",
   },
-  wcs_fielddata: {
+  s_fielddata: {
     ts_type: "number",
   },
-  wcs_import_date: {
+  s_import_date: {
     ts_type: "date",
   },
-  wcs_log_job: {
+  s_log_job: {
     ts_type: "number",
   },
-  wcs_log_trip: {
+  s_log_trip: {
     ts_type: "string",
   },
-  wcs_remark: {
+  s_remark: {
     ts_type: "string",
   },
-  wcs_source_file: {
+  s_source_file: {
     ts_type: "string",
   },
-  wcs_topdepth: {
+  s_topdepth: {
     ts_type: "number",
   },
-  wcs_type: {
+  s_type: {
     ts_type: "string",
   },
-  wcs_wellid: {
+  s_wellid: {
     ts_type: "string",
   },
 
   // GX_WELL_CURVE_VALUES
 
-  wcv_curve_values: {
+  v_curve_values: {
     ts_type: "number",
     xform: "decode_curve_values",
   },
-  wcv_curve_values_orig: {
+  v_curve_values_orig: {
     ts_type: "string",
     xform: "blob_to_hex",
   },
-  wcv_curvename: {
+  v_curvename: {
     ts_type: "string",
   },
-  wcv_curveset: {
+  v_curveset: {
     ts_type: "string",
   },
-  wcv_version: {
+  v_version: {
     ts_type: "number",
   },
-  wcv_wellid: {
+  v_wellid: {
     ts_type: "string",
   },
 };
 
 const prefixes = {
   w_: "well",
-  wc_: "gx_well_curve",
-  wcs_: "gx_well_curveset",
-  wcv_: "gx_well_curve_values",
+  c_: "gx_well_curve",
+  s_: "gx_well_curveset",
+  v_: "gx_well_curve_values",
 };
 
-const global_id_keys = ["w_uwi", "wc_curveset", "wc_curvename", "wc_version"];
+const asset_id_keys = ["w_uwi", "c_curveset", "c_curvename", "c_version"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
-
 const default_chunk = 5000;
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
+    asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

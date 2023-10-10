@@ -16,64 +16,64 @@ const defineSQL = (filter) => {
         uwi                        AS w_uwi
       FROM well
     ),
-    ss AS (
+    d AS (
       SELECT 
-        uwi                 AS id_ss_uwi,
-        survey_id           AS id_ss_survey_id,
-        source              AS id_ss_source,
-        'actual'            AS id_ss_kind,
-        LIST(IFNULL(azimuth,              '${N}', CAST(azimuth AS VARCHAR)),                 '${D}' ORDER BY station_md)  AS ss_azimuth,
-        LIST(IFNULL(azimuth_ouom,         '${N}', azimuth_ouom),                             '${D}' ORDER BY station_md)  AS ss_azimuth_ouom,
-        LIST(IFNULL(ew_direction,         '${N}', ew_direction),                             '${D}' ORDER BY station_md)  AS ss_ew_direction,
-        LIST(IFNULL(gx_closure,           '${N}', gx_closure),                               '${D}' ORDER BY station_md)  AS ss_gx_closure,
-        LIST(IFNULL(gx_station_latitude,  '${N}', CAST(gx_station_latitude AS VARCHAR)),     '${D}' ORDER BY station_md)  AS ss_gx_station_latitude,
-        LIST(IFNULL(gx_station_longitude, '${N}', CAST(gx_station_longitude AS VARCHAR)),    '${D}' ORDER BY station_md)  AS ss_gx_station_longitude,
-        LIST(IFNULL(inclination,          '${N}', CAST(inclination AS VARCHAR)),             '${D}' ORDER BY station_md)  AS ss_inclination,
-        LIST(IFNULL(inclination_ouom,     '${N}', inclination_ouom),                         '${D}' ORDER BY station_md)  AS ss_inclination_ouom,
-        LIST(IFNULL(ns_direction,         '${N}', ns_direction),                             '${D}' ORDER BY station_md)  AS ss_ns_direction,
-        LIST(IFNULL(row_changed_date,     '${N}', CAST(row_changed_date AS VARCHAR)),        '${D}' ORDER BY station_md)  AS ss_row_changed_date,
-        LIST(IFNULL(source,               '${N}', source),                                   '${D}' ORDER BY station_md)  AS ss_source,
-        LIST(IFNULL(station_id,           '${N}', station_id),                               '${D}' ORDER BY station_md)  AS ss_station_id,
-        LIST(IFNULL(station_md,           '${N}', CAST(station_md AS VARCHAR)),              '${D}' ORDER BY station_md)  AS ss_station_md,
-        LIST(IFNULL(station_md_ouom,      '${N}', station_md_ouom),                          '${D}' ORDER BY station_md)  AS ss_station_md_ouom,
-        LIST(IFNULL(station_tvd,          '${N}', CAST(station_tvd AS VARCHAR)),             '${D}' ORDER BY station_md)  AS ss_station_tvd,
-        LIST(IFNULL(station_tvd_ouom,     '${N}', station_tvd_ouom),                         '${D}' ORDER BY station_md)  AS ss_station_tvd_ouom,
-        LIST(IFNULL(survey_id,            '${N}', survey_id),                                '${D}' ORDER BY station_md)  AS ss_survey_id,
-        LIST(IFNULL(uwi,                  '${N}', uwi),                                      '${D}' ORDER BY station_md)  AS ss_uwi,
-        LIST(IFNULL(x_offset,             '${N}', CAST(x_offset AS VARCHAR)),                '${D}' ORDER BY station_md)  AS ss_x_offset,
-        LIST(IFNULL(x_offset_ouom,        '${N}', x_offset_ouom),                            '${D}' ORDER BY station_md)  AS ss_x_offset_ouom,
-        LIST(IFNULL(y_offset,             '${N}', CAST(y_offset AS VARCHAR)),                '${D}' ORDER BY station_md)  AS ss_y_offset,
-        LIST(IFNULL(y_offset_ouom,        '${N}', y_offset_ouom),                            '${D}' ORDER BY station_md)  AS ss_y_offset_ouom
+        uwi                 AS id_d_uwi,
+        survey_id           AS id_d_survey_id,
+        source              AS id_d_source,
+        'actual'            AS id_d_kind,
+        LIST(IFNULL(azimuth,              '${N}', CAST(azimuth AS VARCHAR)),                 '${D}' ORDER BY station_md)  AS d_azimuth,
+        LIST(IFNULL(azimuth_ouom,         '${N}', azimuth_ouom),                             '${D}' ORDER BY station_md)  AS d_azimuth_ouom,
+        LIST(IFNULL(ew_direction,         '${N}', ew_direction),                             '${D}' ORDER BY station_md)  AS d_ew_direction,
+        LIST(IFNULL(gx_closure,           '${N}', gx_closure),                               '${D}' ORDER BY station_md)  AS d_gx_closure,
+        LIST(IFNULL(gx_station_latitude,  '${N}', CAST(gx_station_latitude AS VARCHAR)),     '${D}' ORDER BY station_md)  AS d_gx_station_latitude,
+        LIST(IFNULL(gx_station_longitude, '${N}', CAST(gx_station_longitude AS VARCHAR)),    '${D}' ORDER BY station_md)  AS d_gx_station_longitude,
+        LIST(IFNULL(inclination,          '${N}', CAST(inclination AS VARCHAR)),             '${D}' ORDER BY station_md)  AS d_inclination,
+        LIST(IFNULL(inclination_ouom,     '${N}', inclination_ouom),                         '${D}' ORDER BY station_md)  AS d_inclination_ouom,
+        LIST(IFNULL(ns_direction,         '${N}', ns_direction),                             '${D}' ORDER BY station_md)  AS d_ns_direction,
+        LIST(IFNULL(row_changed_date,     '${N}', CAST(row_changed_date AS VARCHAR)),        '${D}' ORDER BY station_md)  AS d_row_changed_date,
+        LIST(IFNULL(source,               '${N}', source),                                   '${D}' ORDER BY station_md)  AS d_source,
+        LIST(IFNULL(station_id,           '${N}', station_id),                               '${D}' ORDER BY station_md)  AS d_station_id,
+        LIST(IFNULL(station_md,           '${N}', CAST(station_md AS VARCHAR)),              '${D}' ORDER BY station_md)  AS d_station_md,
+        LIST(IFNULL(station_md_ouom,      '${N}', station_md_ouom),                          '${D}' ORDER BY station_md)  AS d_station_md_ouom,
+        LIST(IFNULL(station_tvd,          '${N}', CAST(station_tvd AS VARCHAR)),             '${D}' ORDER BY station_md)  AS d_station_tvd,
+        LIST(IFNULL(station_tvd_ouom,     '${N}', station_tvd_ouom),                         '${D}' ORDER BY station_md)  AS d_station_tvd_ouom,
+        LIST(IFNULL(survey_id,            '${N}', survey_id),                                '${D}' ORDER BY station_md)  AS d_survey_id,
+        LIST(IFNULL(uwi,                  '${N}', uwi),                                      '${D}' ORDER BY station_md)  AS d_uwi,
+        LIST(IFNULL(x_offset,             '${N}', CAST(x_offset AS VARCHAR)),                '${D}' ORDER BY station_md)  AS d_x_offset,
+        LIST(IFNULL(x_offset_ouom,        '${N}', x_offset_ouom),                            '${D}' ORDER BY station_md)  AS d_x_offset_ouom,
+        LIST(IFNULL(y_offset,             '${N}', CAST(y_offset AS VARCHAR)),                '${D}' ORDER BY station_md)  AS d_y_offset,
+        LIST(IFNULL(y_offset_ouom,        '${N}', y_offset_ouom),                            '${D}' ORDER BY station_md)  AS d_y_offset_ouom
       FROM well_dir_srvy_station
       GROUP BY uwi, survey_id, source
      UNION
       SELECT 
-        uwi                 AS id_ss_uwi,
-        survey_id           AS id_ss_survey_id,
-        source              AS id_ss_source,
-        'proposed'          AS id_ss_kind,
-        LIST(IFNULL(azimuth,              '${N}', CAST(azimuth AS VARCHAR)),                 '${D}' ORDER BY station_md)  AS ss_azimuth,
-        LIST(IFNULL(azimuth_ouom,         '${N}', azimuth_ouom),                             '${D}' ORDER BY station_md)  AS ss_azimuth_ouom,
-        LIST(IFNULL(ew_direction,         '${N}', ew_direction),                             '${D}' ORDER BY station_md)  AS ss_ew_direction,
-        LIST(IFNULL(gx_closure,           '${N}', gx_closure),                               '${D}' ORDER BY station_md)  AS ss_gx_closure,
-        LIST(IFNULL(gx_station_latitude,  '${N}', CAST(gx_station_latitude AS VARCHAR)),     '${D}' ORDER BY station_md)  AS ss_gx_station_latitude,
-        LIST(IFNULL(gx_station_longitude, '${N}', CAST(gx_station_longitude AS VARCHAR)),    '${D}' ORDER BY station_md)  AS ss_gx_station_longitude,
-        LIST(IFNULL(inclination,          '${N}', CAST(inclination AS VARCHAR)),             '${D}' ORDER BY station_md)  AS ss_inclination,
-        LIST(IFNULL(inclination_ouom,     '${N}', inclination_ouom),                         '${D}' ORDER BY station_md)  AS ss_inclination_ouom,
-        LIST(IFNULL(ns_direction,         '${N}', ns_direction),                             '${D}' ORDER BY station_md)  AS ss_ns_direction,
-        LIST(IFNULL(row_changed_date,     '${N}', CAST(row_changed_date AS VARCHAR)),        '${D}' ORDER BY station_md)  AS ss_row_changed_date,
-        LIST(IFNULL(source,               '${N}', source),                                   '${D}' ORDER BY station_md)  AS ss_source,
-        LIST(IFNULL(station_id,           '${N}', station_id),                               '${D}' ORDER BY station_md)  AS ss_station_id,
-        LIST(IFNULL(station_md,           '${N}', CAST(station_md AS VARCHAR)),              '${D}' ORDER BY station_md)  AS ss_station_md,
-        LIST(IFNULL(station_md_ouom,      '${N}', station_md_ouom),                          '${D}' ORDER BY station_md)  AS ss_station_md_ouom,
-        LIST(IFNULL(station_tvd,          '${N}', CAST(station_tvd AS VARCHAR)),             '${D}' ORDER BY station_md)  AS ss_station_tvd,
-        LIST(IFNULL(station_tvd_ouom,     '${N}', station_tvd_ouom),                         '${D}' ORDER BY station_md)  AS ss_station_tvd_ouom,
-        LIST(IFNULL(survey_id,            '${N}', survey_id),                                '${D}' ORDER BY station_md)  AS ss_survey_id,
-        LIST(IFNULL(uwi,                  '${N}', uwi),                                      '${D}' ORDER BY station_md)  AS ss_uwi,
-        LIST(IFNULL(x_offset,             '${N}', CAST(x_offset AS VARCHAR)),                '${D}' ORDER BY station_md)  AS ss_x_offset,
-        LIST(IFNULL(x_offset_ouom,        '${N}', x_offset_ouom),                            '${D}' ORDER BY station_md)  AS ss_x_offset_ouom,
-        LIST(IFNULL(y_offset,             '${N}', CAST(y_offset AS VARCHAR)),                '${D}' ORDER BY station_md)  AS ss_y_offset,
-        LIST(IFNULL(y_offset_ouom,        '${N}', y_offset_ouom),                            '${D}' ORDER BY station_md)  AS ss_y_offset_ouom
+        uwi                 AS id_d_uwi,
+        survey_id           AS id_d_survey_id,
+        source              AS id_d_source,
+        'proposed'          AS id_d_kind,
+        LIST(IFNULL(azimuth,              '${N}', CAST(azimuth AS VARCHAR)),                 '${D}' ORDER BY station_md)  AS d_azimuth,
+        LIST(IFNULL(azimuth_ouom,         '${N}', azimuth_ouom),                             '${D}' ORDER BY station_md)  AS d_azimuth_ouom,
+        LIST(IFNULL(ew_direction,         '${N}', ew_direction),                             '${D}' ORDER BY station_md)  AS d_ew_direction,
+        LIST(IFNULL(gx_closure,           '${N}', gx_closure),                               '${D}' ORDER BY station_md)  AS d_gx_closure,
+        LIST(IFNULL(gx_station_latitude,  '${N}', CAST(gx_station_latitude AS VARCHAR)),     '${D}' ORDER BY station_md)  AS d_gx_station_latitude,
+        LIST(IFNULL(gx_station_longitude, '${N}', CAST(gx_station_longitude AS VARCHAR)),    '${D}' ORDER BY station_md)  AS d_gx_station_longitude,
+        LIST(IFNULL(inclination,          '${N}', CAST(inclination AS VARCHAR)),             '${D}' ORDER BY station_md)  AS d_inclination,
+        LIST(IFNULL(inclination_ouom,     '${N}', inclination_ouom),                         '${D}' ORDER BY station_md)  AS d_inclination_ouom,
+        LIST(IFNULL(ns_direction,         '${N}', ns_direction),                             '${D}' ORDER BY station_md)  AS d_ns_direction,
+        LIST(IFNULL(row_changed_date,     '${N}', CAST(row_changed_date AS VARCHAR)),        '${D}' ORDER BY station_md)  AS d_row_changed_date,
+        LIST(IFNULL(source,               '${N}', source),                                   '${D}' ORDER BY station_md)  AS d_source,
+        LIST(IFNULL(station_id,           '${N}', station_id),                               '${D}' ORDER BY station_md)  AS d_station_id,
+        LIST(IFNULL(station_md,           '${N}', CAST(station_md AS VARCHAR)),              '${D}' ORDER BY station_md)  AS d_station_md,
+        LIST(IFNULL(station_md_ouom,      '${N}', station_md_ouom),                          '${D}' ORDER BY station_md)  AS d_station_md_ouom,
+        LIST(IFNULL(station_tvd,          '${N}', CAST(station_tvd AS VARCHAR)),             '${D}' ORDER BY station_md)  AS d_station_tvd,
+        LIST(IFNULL(station_tvd_ouom,     '${N}', station_tvd_ouom),                         '${D}' ORDER BY station_md)  AS d_station_tvd_ouom,
+        LIST(IFNULL(survey_id,            '${N}', survey_id),                                '${D}' ORDER BY station_md)  AS d_survey_id,
+        LIST(IFNULL(uwi,                  '${N}', uwi),                                      '${D}' ORDER BY station_md)  AS d_uwi,
+        LIST(IFNULL(x_offset,             '${N}', CAST(x_offset AS VARCHAR)),                '${D}' ORDER BY station_md)  AS d_x_offset,
+        LIST(IFNULL(x_offset_ouom,        '${N}', x_offset_ouom),                            '${D}' ORDER BY station_md)  AS d_x_offset_ouom,
+        LIST(IFNULL(y_offset,             '${N}', CAST(y_offset AS VARCHAR)),                '${D}' ORDER BY station_md)  AS d_y_offset,
+        LIST(IFNULL(y_offset_ouom,        '${N}', y_offset_ouom),                            '${D}' ORDER BY station_md)  AS d_y_offset_ouom
       FROM well_dir_proposed_srvy_station
       GROUP BY uwi, survey_id, source
     ),
@@ -177,21 +177,19 @@ const defineSQL = (filter) => {
     SELECT
       w.*,
       s.*,
-      ss.*
-    FROM ss
+      d.*
+    FROM d
     JOIN s
-      ON s.s_source = ss.id_ss_source
-      AND s.s_survey_id = ss.id_ss_survey_id
-      AND s.s_uwi = ss.id_ss_uwi
-      AND s.s_kind = ss.id_ss_kind
+      ON s.s_source = d.id_d_source
+      AND s.s_survey_id = d.id_d_survey_id
+      AND s.s_uwi = d.id_d_uwi
+      AND s.s_kind = d.id_d_kind
     JOIN w ON w.w_uwi = s.s_uwi
     ) x`;
 
-  const order = `ORDER BY w_uwi`;
+  const order = `ORDER BY w_uwi, id_d_survey_id, id_d_uwi, id_d_kind`;
 
   const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT wellid) AS count FROM gx_well_curve`;
 
   return {
     select: select,
@@ -202,6 +200,9 @@ const defineSQL = (filter) => {
 };
 
 const xformer = (args) => {
+  const D = "|&|";
+  const N = "purrNULL";
+
   let { func, key, typ, arg, obj } = args;
 
   const ensureType = (type: string, val: any) => {
@@ -212,10 +213,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -232,9 +231,6 @@ const xformer = (args) => {
       return "XFORM ME";
     }
   };
-
-  const D = "|&|";
-  const N = "purrNULL";
 
   if (obj[key] == null) {
     return null;
@@ -411,129 +407,127 @@ const xforms = {
 
   // WELL_DIR_SRVY_STATION + WELL_DIR_PROPOSED_SRVY_STATION
 
-  id_ss_uwi: {
+  id_d_uwi: {
     ts_type: "string",
   },
-  id_ss_survey_id: {
+  id_d_survey_id: {
     ts_type: "string",
   },
-  id_ss_source: {
+  id_d_source: {
     ts_type: "string",
   },
-  id_ss_kind: {
+  id_d_kind: {
     ts_type: "string",
   },
-  ss_azimuth: {
+  d_azimuth: {
     ts_type: "number",
     xform: "delimited_array_with_nulls",
   },
-  ss_azimuth_ouom: {
+  d_azimuth_ouom: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_ew_direction: {
+  d_ew_direction: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_gx_closure: {
+  d_gx_closure: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_gx_station_latitude: {
+  d_gx_station_latitude: {
     ts_type: "number",
     xform: "delimited_array_with_nulls",
   },
-  ss_gx_station_longitude: {
+  d_gx_station_longitude: {
     ts_type: "number",
     xform: "delimited_array_with_nulls",
   },
-  ss_inclination: {
+  d_inclination: {
     ts_type: "number",
     xform: "delimited_array_with_nulls",
   },
-  ss_inclination_ouom: {
+  d_inclination_ouom: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_ns_direction: {
+  d_ns_direction: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_row_changed_date: {
+  d_row_changed_date: {
     ts_type: "date",
     xform: "delimited_array_with_nulls",
   },
-  ss_source: {
+  d_source: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_station_id: {
+  d_station_id: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_station_md: {
+  d_station_md: {
     ts_type: "number",
     xform: "delimited_array_with_nulls",
   },
-  ss_station_md_ouom: {
+  d_station_md_ouom: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_station_tvd: {
+  d_station_tvd: {
     ts_type: "number",
     xform: "delimited_array_with_nulls",
   },
-  ss_station_tvd_ouom: {
+  d_station_tvd_ouom: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_survey_id: {
+  d_survey_id: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_uwi: {
+  d_uwi: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_x_offset: {
+  d_x_offset: {
     ts_type: "number",
     xform: "delimited_array_with_nulls",
   },
-  ss_x_offset_ouom: {
+  d_x_offset_ouom: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
-  ss_y_offset: {
+  d_y_offset: {
     ts_type: "number",
     xform: "delimited_array_with_nulls",
   },
-  ss_y_offset_ouom: {
+  d_y_offset_ouom: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
   },
 };
 
+// NOTE: the "proposed" survey/station tables get normlized by the union
 const prefixes = {
   w_: "well",
-  ss_: "well_dir_srvy_station",
+  d_: "well_dir_srvy_station",
   s_: "well_dir_srvy",
 };
 
-const global_id_keys = ["w_uwi"];
+const asset_id_keys = ["w_uwi", "id_d_survey_id", "id_d_uwi", "id_d_kind"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
-
 const default_chunk = 500;
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
+    asset_id_keys: asset_id_keys,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

@@ -73,11 +73,7 @@ const defineSQL = (filter) => {
 
   const order = `ORDER BY w_uwi, n_zid`;
 
-  const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT uwi) AS count FROM well`;
-
-  // NOTE: key vs keylist (purrio_client batcher figures it out)
+  // NOTE: key, not keylist
   const identifier = `
     SELECT
       ${idForm} AS key
@@ -91,17 +87,19 @@ const defineSQL = (filter) => {
     `;
 
   return {
-    identifier: identifier,
     id_cols: idCols,
-    where_clause_stub: where_clause_stub,
-    select: select,
-    count: count,
+    identifier: identifier,
     order: order,
+    select: select,
     where: where,
+    where_clause_stub: where_clause_stub,
   };
 };
 
 const xformer = (args) => {
+  const D = "|&|";
+  const N = "purrNULL";
+
   let { func, key, typ, arg, obj } = args;
 
   const ensureType = (type: string, val: any) => {
@@ -112,10 +110,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -133,9 +129,6 @@ const xformer = (args) => {
     }
   };
 
-  const D = "|&|";
-  const N = "purrNULL";
-
   if (obj[key] == null) {
     return null;
   }
@@ -152,14 +145,12 @@ const xformer = (args) => {
           return;
         }
       })();
-
     case "delimited_array_of_memo":
       return (() => {
         const localX = (v) => {
           const buf = Buffer.from(v, "binary");
           return ensureType("string", buf.toString("utf-8"));
         };
-
         try {
           return obj[key].split(D).map((v) => (v === N ? null : localX(v)));
         } catch (error) {
@@ -167,7 +158,6 @@ const xformer = (args) => {
           return;
         }
       })();
-
     case "delimited_array_of_hex":
       return (() => {
         const localX = (v) => {
@@ -180,7 +170,6 @@ const xformer = (args) => {
           return;
         }
       })();
-
     case "excel_date":
       return (() => {
         try {
@@ -250,7 +239,6 @@ const xforms = {
   z_text: {
     ts_type: "string",
     xform: "delimited_array_of_memo",
-    //xform: "memo_to_string",
   },
   z_datalen: {
     ts_type: "number",
@@ -259,7 +247,6 @@ const xforms = {
   z_data: {
     ts_type: "string",
     xform: "delimited_array_of_hex",
-    //xform: "blob_to_hex",
   },
 
   // ZONEDEF
@@ -376,21 +363,18 @@ const prefixes = {
   z_: "zdata",
 };
 
-const global_id_keys = ["w_uwi", "n_zid"];
+const asset_id_keys = ["w_uwi", "n_zid"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
-
 const default_chunk = 1000;
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
+    asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

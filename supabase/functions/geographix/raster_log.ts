@@ -81,8 +81,6 @@ const defineSQL = (filter) => {
 
   const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
 
-  //const fast_count = `SELECT COUNT(DISTINCT wellid) AS count FROM gx_well_curve`;
-
   return {
     select: select,
     count: count,
@@ -102,10 +100,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -339,21 +335,18 @@ const prefixes = {
   r_: "log_image_reg_log_section",
 };
 
-const global_id_keys = ["w_uwi", "r_log_section_index"];
+const asset_id_keys = ["w_uwi", "r_log_section_index"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
-
 const default_chunk = 5000;
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
+    asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

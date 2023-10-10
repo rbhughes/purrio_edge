@@ -122,50 +122,48 @@ const defineSQL = (filter) => {
         ggx_internal_status         AS fk_internal_status 
       FROM well
     ),
-    co AS (
+    c AS (
       SELECT
-        uwi                         AS co_uwi,
-        location_type               AS co_location_type,
-        bh_flag                     AS co_bh_flag,
-        source                      AS co_source,
-        congress_range              AS co_congress_range,
-        congress_sect_suffix        AS co_congress_sect_suffix,
-        ew_direction                AS co_ew_direction,
-        congress_section            AS co_congress_section,
-        congress_sect_type          AS co_congress_sect_type,
-        congress_township           AS co_congress_township,
-        ns_direction                AS co_ns_direction,
-        congress_twp_name           AS co_congress_twp_name,
-        principal_meridian          AS co_principal_meridian,
-        ns_footage                  AS co_ns_footage,
-        ns_start_line               AS co_ns_start_line,
-        ew_footage                  AS co_ew_footage,
-        ew_start_line               AS co_ew_start_line,
-        footage_origin              AS co_footage_origin,
-        spot_code                   AS co_spot_code,
-        remark                      AS co_remark,
-        ns_footage_ouom             AS co_ns_footage_ouom,
-        ew_footage_ouom             AS co_ew_footage_ouom,
-        row_changed_date            AS co_row_changed_date,
-        polygonid                   AS co_polygonid,
-        county                      AS co_county,
-        country                     AS co_country,
-        province_state              AS co_province_state
+        uwi                         AS c_uwi,
+        location_type               AS c_location_type,
+        bh_flag                     AS c_bh_flag,
+        source                      AS c_source,
+        congress_range              AS c_congress_range,
+        congress_sect_suffix        AS c_congress_sect_suffix,
+        ew_direction                AS c_ew_direction,
+        congress_section            AS c_congress_section,
+        congress_sect_type          AS c_congress_sect_type,
+        congress_township           AS c_congress_township,
+        ns_direction                AS c_ns_direction,
+        congress_twp_name           AS c_congress_twp_name,
+        principal_meridian          AS c_principal_meridian,
+        ns_footage                  AS c_ns_footage,
+        ns_start_line               AS c_ns_start_line,
+        ew_footage                  AS c_ew_footage,
+        ew_start_line               AS c_ew_start_line,
+        footage_origin              AS c_footage_origin,
+        spot_code                   AS c_spot_code,
+        remark                      AS c_remark,
+        ns_footage_ouom             AS c_ns_footage_ouom,
+        ew_footage_ouom             AS c_ew_footage_ouom,
+        row_changed_date            AS c_row_changed_date,
+        polygonid                   AS c_polygonid,
+        county                      AS c_county,
+        country                     AS c_country,
+        province_state              AS c_province_state
       FROM legal_congress_loc
     )
     SELECT
       w.*,
-      co.*
+      c.*
     FROM  w
-    LEFT JOIN co ON
-      co.co_uwi = w.w_uwi
+    LEFT JOIN c ON
+      c.c_uwi = w.w_uwi
     ) x`;
 
   const order = `ORDER BY w_uwi`;
 
   const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT uwi) AS count FROM well`;
 
   return {
     select: select,
@@ -186,10 +184,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -569,88 +565,87 @@ const xforms = {
   },
 
   // LEGAL_CARTER_LOC
-
   // LEGAL_CONGRESS_LOC
 
-  co_bh_flag: {
+  c_bh_flag: {
     ts_type: "number",
   },
-  co_congress_range: {
+  c_congress_range: {
     ts_type: "number",
   },
-  co_congress_sect_suffix: {
+  c_congress_sect_suffix: {
     ts_type: "string",
   },
-  co_congress_sect_type: {
+  c_congress_sect_type: {
     ts_type: "string",
   },
-  co_congress_section: {
+  c_congress_section: {
     ts_type: "number",
   },
-  co_congress_township: {
+  c_congress_township: {
     ts_type: "number",
   },
-  co_congress_twp_name: {
+  c_congress_twp_name: {
     ts_type: "string",
   },
-  co_country: {
+  c_country: {
     ts_type: "string",
   },
-  co_county: {
+  c_county: {
     ts_type: "string",
   },
-  co_ew_direction: {
+  c_ew_direction: {
     ts_type: "string",
   },
-  co_ew_footage: {
+  c_ew_footage: {
     ts_type: "number",
   },
-  co_ew_footage_ouom: {
+  c_ew_footage_ouom: {
     ts_type: "string",
   },
-  co_ew_start_line: {
+  c_ew_start_line: {
     ts_type: "string",
   },
-  co_footage_origin: {
+  c_footage_origin: {
     ts_type: "string",
   },
-  co_location_type: {
+  c_location_type: {
     ts_type: "string",
   },
-  co_ns_direction: {
+  c_ns_direction: {
     ts_type: "string",
   },
-  co_ns_footage: {
+  c_ns_footage: {
     ts_type: "number",
   },
-  co_ns_footage_ouom: {
+  c_ns_footage_ouom: {
     ts_type: "string",
   },
-  co_ns_start_line: {
+  c_ns_start_line: {
     ts_type: "string",
   },
-  co_polygonid: {
+  c_polygonid: {
     ts_type: "number",
   },
-  co_principal_meridian: {
+  c_principal_meridian: {
     ts_type: "string",
   },
-  co_province_state: {
+  c_province_state: {
     ts_type: "string",
   },
-  co_remark: {
+  c_remark: {
     ts_type: "string",
   },
-  co_row_changed_date: {
+  c_row_changed_date: {
     ts_type: "date",
   },
-  co_source: {
+  c_source: {
     ts_type: "string",
   },
-  co_spot_code: {
+  c_spot_code: {
     ts_type: "string",
   },
-  co_uwi: {
+  c_uwi: {
     ts_type: "string",
   },
 
@@ -666,24 +661,21 @@ const xforms = {
 
 const prefixes = {
   w_: "well",
-  co_: "legal_congress_loc",
+  c_: "legal_congress_loc",
 };
 
-const global_id_keys = ["w_uwi"];
+const asset_id_keys = ["w_uwi"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
-
 const default_chunk = 1000;
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
+    asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),

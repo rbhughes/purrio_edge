@@ -1,7 +1,16 @@
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
-// assumes one survey per well
-// (dirsurvdata.survrecid = 1 is always true?)
+// assumes one survey per well (dirsurvdata.survrecid = 1 is always true?)
+
+// Need to parse the survey blob? Here's how in Python:
+// # dirsurvdata = 8-byte doubles, unpack as 64-bit float
+// for i in range(0, length, 56):
+//     md.append(struct.unpack('d',       ba[i: i+8])[0]/100)
+//     tvd.append(struct.unpack('d',      ba[i+8: i+16])[0])
+//     x_offset.append(struct.unpack('d', ba[i+16: i+24])[0])
+//     y_offset.append(struct.unpack('d', ba[i+24: i+32])[0])
+//     dip.append(struct.unpack('d',      ba[i+32: i+40])[0])
+//     azimuth.append(struct.unpack('d',  ba[i+40: i+48])[0])
 
 const defineSQL = (filter) => {
   filter = filter ? filter : "";
@@ -19,6 +28,7 @@ const defineSQL = (filter) => {
   let select = `SELECT
     w.wsn          AS w_wsn,
     w.uwi          AS w_uwi,
+
     d.survrecid    AS d_survrecid,
     d.wsn          AS d_wsn,
     d.flags        AS d_flags,
@@ -43,7 +53,9 @@ const defineSQL = (filter) => {
     d.vs_2         AS d_vs_2,
     d.vs_3         AS d_vs_3,
     d.data         AS d_data,
+
     f.name         AS f_survey_type,
+
     LIST(COALESCE(CAST(v.wsn AS VARCHAR(10)),      '${N}'), '${D}') AS v_wsn,
     LIST(COALESCE(CAST(v.md AS VARCHAR(10)),       '${N}'), '${D}') AS v_md,
     LIST(COALESCE(CAST(v.tvd AS VARCHAR(20)),      '${N}'), '${D}') AS v_tvd,
@@ -55,6 +67,7 @@ const defineSQL = (filter) => {
     LIST(COALESCE(CAST(v.d1 AS VARCHAR(20)),       '${N}'), '${D}') AS v_d1,
     LIST(COALESCE(CAST(v.d2 AS VARCHAR(20)),       '${N}'), '${D}') AS v_d2,
     LIST(COALESCE(CAST(v.d3 AS VARCHAR(20)),       '${N}'), '${D}') AS v_d3
+
   FROM well w
   LEFT OUTER JOIN dirsurv v ON v.wsn = w.wsn
   JOIN dirsurvdata d ON d.wsn = w.wsn
@@ -65,11 +78,7 @@ const defineSQL = (filter) => {
 
   const order = `ORDER BY w_uwi`;
 
-  const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  //const fast_count = `SELECT COUNT(DISTINCT uwi) AS count FROM well`;
-
-  // NOTE: key vs keylist (purrio_client batcher figures it out)
+  // NOTE: key, not keylist
   const identifier = `
     SELECT
       ${idForm} AS key
@@ -80,17 +89,19 @@ const defineSQL = (filter) => {
     `;
 
   return {
-    identifier: identifier,
     id_cols: idCols,
-    where_clause_stub: where_clause_stub,
-    select: select,
-    count: count,
+    identifier: identifier,
     order: order,
+    select: select,
     where: where,
+    where_clause_stub: where_clause_stub,
   };
 };
 
 const xformer = (args) => {
+  const D = "|&|";
+  const N = "purrNULL";
+
   let { func, key, typ, arg, obj } = args;
 
   const ensureType = (type: string, val: any) => {
@@ -101,10 +112,8 @@ const xformer = (args) => {
       console.log(val);
       return null;
     } else if (type === "string") {
-      //return decodeWin1252(val)
       return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
     } else if (type === "number") {
-      // cuz blank strings (\t\r\n) evaluate to 0
       if (val.toString().replace(/\s/g, "") === "") {
         return null;
       }
@@ -121,9 +130,6 @@ const xformer = (args) => {
       return "XFORM ME";
     }
   };
-
-  const D = "|&|";
-  const N = "purrNULL";
 
   if (obj[key] == null) {
     return null;
@@ -143,17 +149,8 @@ const xformer = (args) => {
           return null;
         }
       })();
-    // case "last_two_decimal":
-    //   return (() => {
-    //     try {
-    //       return obj[key] / 100;
-    //     } catch (error) {
-    //       console.log("ERROR", error);
-    //       return null;
-    //     }
-    //   })();
     case "delimited_array_drop_two_decimal":
-      // no idea why md values are 100x off in Petra
+      // no idea why md values are 100x off in Petra here
       return (() => {
         try {
           return obj[key]
@@ -164,7 +161,6 @@ const xformer = (args) => {
           return;
         }
       })();
-
     case "delimited_array_with_nulls":
       return (() => {
         try {
@@ -279,18 +275,6 @@ const xforms = {
     xform: "blob_to_hex",
   },
 
-  /*
-    // Need to parse the survey blob in Python?
-    # dirsurvdata = 8-byte doubles, unpack as 64-bit float
-    for i in range(0, length, 56):
-        md.append(struct.unpack('d',       ba[i: i+8])[0]/100)
-        tvd.append(struct.unpack('d',      ba[i+8: i+16])[0])
-        x_offset.append(struct.unpack('d', ba[i+16: i+24])[0])
-        y_offset.append(struct.unpack('d', ba[i+24: i+32])[0])
-        dip.append(struct.unpack('d',      ba[i+32: i+40])[0])
-        azimuth.append(struct.unpack('d',  ba[i+40: i+48])[0])
-    */
-
   // DIRSURVDEF
 
   f_survey_type: {
@@ -306,7 +290,6 @@ const xforms = {
   v_md: {
     ts_type: "number",
     xform: "delimited_array_drop_two_decimal",
-    // xform: "last_two_decimal",
   },
   v_tvd: {
     ts_type: "number",
@@ -353,21 +336,18 @@ const prefixes = {
   v_: "dirsurv",
 };
 
-const global_id_keys = ["w_uwi"];
+const asset_id_keys = ["w_uwi"];
 
 const well_id_keys = ["w_uwi"];
 
-const pg_cols = ["id", "repo_id", "well_id", "geo_type", "tag", "doc"];
-
 const default_chunk = 1000;
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 export const getAssetDNA = (filter) => {
   return {
+    asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
-    global_id_keys: global_id_keys,
-    pg_cols: pg_cols,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     sql: defineSQL(filter),
