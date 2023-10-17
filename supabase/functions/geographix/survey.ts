@@ -520,7 +520,7 @@ const asset_id_keys = ["w_uwi", "id_d_survey_id", "id_d_uwi", "id_d_kind"];
 
 const well_id_keys = ["w_uwi"];
 
-const default_chunk = 500;
+const default_chunk = 100; // 500
 
 ///////////////////////////////////////////////////////////////////////////////
 

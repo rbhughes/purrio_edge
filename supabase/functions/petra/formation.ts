@@ -333,7 +333,7 @@ const asset_id_keys = ["w_uwi", "f_fid"];
 
 const well_id_keys = ["w_uwi"];
 
-const default_chunk = 1000;
+const default_chunk = 100; // 1000
 
 ///////////////////////////////////////////////////////////////////////////////
 

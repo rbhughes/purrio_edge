@@ -776,7 +776,7 @@ const asset_id_keys = [
 
 const well_id_keys = ["w_uwi"];
 
-const default_chunk = 100;
+const default_chunk = 100; // 100
 
 ///////////////////////////////////////////////////////////////////////////////
 

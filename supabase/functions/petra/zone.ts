@@ -78,7 +78,6 @@ const defineSQL = (filter) => {
     SELECT
       ${idForm} AS key
     FROM well w
-    JOIN locat b ON b.wsn = w.wsn
     JOIN zdata z ON z.wsn = w.wsn
     JOIN zonedef n ON n.zid = z.zid AND n.kind > 2
     JOIN zflddef f ON f.zid = n.zid AND f.fid = z.fid
@@ -367,7 +366,7 @@ const asset_id_keys = ["w_uwi", "n_zid"];
 
 const well_id_keys = ["w_uwi"];
 
-const default_chunk = 1000;
+const default_chunk = 100; // 200
 
 ///////////////////////////////////////////////////////////////////////////////
 

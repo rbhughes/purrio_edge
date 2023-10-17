@@ -272,7 +272,7 @@ const asset_id_keys = ["w_uwi", "c_curveset", "c_curvename", "c_version"];
 
 const well_id_keys = ["w_uwi"];
 
-const default_chunk = 5000;
+const default_chunk = 100; // 1000
 
 ///////////////////////////////////////////////////////////////////////////////
 

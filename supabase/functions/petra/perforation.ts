@@ -1,6 +1,10 @@
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
-// AKA PERFS
+// Petra's concept of perfs is less "overwrought" than ggx. The sensible thing
+// is to consider common dates to signify a single completion event. The
+// completion may even be indicated by the API number's last 4 digits:
+// 0001, 0002, 0003 signify recompletions
+// maybe in 11th position like 0100 if it's a horizontal well
 
 const defineSQL = (filter) => {
   filter = filter ? filter : "";
@@ -224,7 +228,7 @@ const asset_id_keys = ["w_uwi", "p_recid"];
 
 const well_id_keys = ["w_uwi"];
 
-const default_chunk = 500;
+const default_chunk = 100; // 1000
 
 ///////////////////////////////////////////////////////////////////////////////
 
