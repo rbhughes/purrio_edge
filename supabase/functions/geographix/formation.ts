@@ -19,6 +19,7 @@ const defineSQL = (filter) => {
     f AS (
       SELECT
         uwi                       AS id_f_uwi,
+        MAX(row_changed_date)     AS max_row_changed_date,
         LIST(IFNULL(dominant_lithology,      '${N}', CAST(dominant_lithology AS VARCHAR)),      '${D}' ORDER BY form_obs_no) AS f_dominant_lithology,
         LIST(IFNULL(fault_name,              '${N}', CAST(fault_name AS VARCHAR)),              '${D}' ORDER BY form_obs_no) AS f_fault_name,
         LIST(IFNULL(faulted_ind,             '${N}', CAST(faulted_ind AS VARCHAR)),             '${D}' ORDER BY form_obs_no) AS f_faulted_ind,
@@ -160,6 +161,9 @@ const xforms = {
 
   id_f_uwi: {
     ts_type: "string",
+  },
+  max_row_changed_date: {
+    ts_type: "date",
   },
 
   f_dominant_lithology: {

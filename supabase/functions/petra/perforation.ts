@@ -6,7 +6,7 @@ import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 // 0001, 0002, 0003 signify recompletions
 // maybe in 11th position like 0100 if it's a horizontal well
 
-const defineSQL = (filter) => {
+const defineSQL = (filter, recency) => {
   filter = filter ? filter : "";
 
   const where_clause_stub = "__pUrRwHeRe__";
@@ -15,7 +15,16 @@ const defineSQL = (filter) => {
     .map((i) => `CAST(${i} AS VARCHAR(10))`)
     .join(` || '-' || `);
 
-  const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
+  const whereClause = ["WHERE 1=1"];
+
+  if (recency > 0) {
+    let now = Date.now() / (86400 * 1000) + 25569;
+    whereClause.push(`p.chgdate >= ${now - recency} AND p.chgdate < 1E30`);
+  }
+  if (filter.trim().length > 0) {
+    whereClause.push(filter);
+  }
+  const where = whereClause.join(" AND ");
 
   let select = `SELECT
     w.wsn          AS w_wsn,
@@ -232,15 +241,16 @@ const default_chunk = 100; // 1000
 
 ///////////////////////////////////////////////////////////////////////////////
 
-export const getAssetDNA = (filter) => {
+export const getAssetDNA = (filter, recency) => {
   return {
     asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
     serialized_doc_processor: serialize(aggregatePERFS),
-    sql: defineSQL(filter),
+    sql: defineSQL(filter, recency),
     well_id_keys: well_id_keys,
     xforms: xforms,
+    notes: [],
   };
 };

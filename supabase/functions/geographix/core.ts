@@ -2,13 +2,26 @@ import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
 // TODO: need bigger test data to set default
 
-const defineSQL = (filter) => {
+const defineSQL = (filter, recency) => {
   const D = "|&|";
   const N = "purrNULL";
 
   filter = filter ? filter : "";
 
-  const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
+  //const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
+  const whereClause = ["WHERE 1=1"];
+
+  if (recency > 0) {
+    whereClause.push(
+      `c_row_changed_date >= DATEADD(DAY, -${recency}, CURRENT DATE)`
+    );
+  }
+  if (filter.trim().length > 0) {
+    whereClause.push(filter);
+  }
+  const where = whereClause.join(" AND ");
+
+  //  where = `WHERE c_row_changed_date >= DATEADD(DAY, -${recency}, CURRENT DATE)`
 
   // let select = `SELECT * FROM (
   //   WITH w AS (
@@ -324,6 +337,7 @@ const defineSQL = (filter) => {
         core_id                    AS id_core_id,
         source                     AS id_source,
         uwi                        AS id_uwi,
+        MAX(row_changed_date)      AS max_row_changed_date,
         LIST(IFNULL(analysis_obs_no,          '${N}', CAST(analysis_obs_no AS VARCHAR)),          '${D}' ORDER BY core_id) AS s_analysis_obs_no,
         LIST(IFNULL(core_id,                  '${N}', CAST(core_id AS VARCHAR)),                  '${D}' ORDER BY core_id) AS s_core_id,
         LIST(IFNULL(gas_sat_vol,              '${N}', CAST(gas_sat_vol AS VARCHAR)),              '${D}' ORDER BY core_id) AS s_gas_sat_vol,
@@ -461,6 +475,10 @@ const xforms = {
   id_uwi: {
     ts_type: "string",
   },
+  max_row_changed_date: {
+    ts_type: "date",
+  },
+
   s_analysis_obs_no: {
     ts_type: "number",
     xform: "delimited_array_with_nulls",
@@ -1486,14 +1504,17 @@ const default_chunk = 100; // 200
 
 ///////////////////////////////////////////////////////////////////////////////
 
-export const getAssetDNA = (filter) => {
+export const getAssetDNA = (filter, recency) => {
   return {
     asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
-    sql: defineSQL(filter),
+    sql: defineSQL(filter, recency),
     well_id_keys: well_id_keys,
     xforms: xforms,
+    notes: [
+      'Omitted "gx_user*" columns in WELL_CORE_SAMPLE_ANAL to conserve memory.',
+    ],
   };
 };

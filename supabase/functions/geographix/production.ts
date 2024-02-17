@@ -234,6 +234,7 @@ const defineSQL = (filter) => {
         zone_id                          AS id_m_zone_id,
         activity_type                    AS id_m_activity_type,
         volume_method                    AS id_m_volume_method,
+        MAX(row_changed_date)            AS max_row_changed_date,
         LIST(IFNULL(pden_date,             '${N}', CAST(pden_date AS VARCHAR)),             '${D}') AS m_pden_date,
         LIST(IFNULL(pden_source,           '${N}', pden_source),                            '${D}') AS m_pden_source,
         LIST(IFNULL(gas_volume,            '${N}', CAST(gas_volume AS VARCHAR)),            '${D}') AS m_gas_volume,
@@ -347,6 +348,9 @@ const xforms = {
   },
   id_m_volume_method: {
     ts_type: "string",
+  },
+  max_row_changed_date: {
+    ts_type: "date",
   },
   // m_uwi: {
   //   ts_type: "string",

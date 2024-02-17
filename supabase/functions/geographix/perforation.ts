@@ -17,6 +17,7 @@ const defineSQL = (filter) => {
     p AS (
       SELECT 
         uwi                        AS id_p_uwi,
+        MAX(row_changed_date)      AS max_row_changed_date,
         LIST(IFNULL(base_depth,                 '${N}', CAST(base_depth AS VARCHAR)),                '${D}' ORDER BY perforation_obs_no) AS p_base_depth,
         LIST(IFNULL(base_form,                  '${N}', CAST(base_form AS VARCHAR)),                 '${D}' ORDER BY perforation_obs_no) AS p_base_form,
         LIST(IFNULL(cluster,                    '${N}', CAST(cluster AS VARCHAR)),                   '${D}' ORDER BY perforation_obs_no) AS p_cluster,
@@ -129,6 +130,9 @@ const xforms = {
 
   id_p_uwi: {
     ts_type: "string",
+  },
+  max_row_changed_date: {
+    ts_type: "date",
   },
 
   p_base_depth: {

@@ -13,15 +13,16 @@ const defineSQL = (filter) => {
   let select = `SELECT * FROM (
     WITH w AS (
       SELECT
-        uwi                        AS w_uwi
+        uwi                   AS w_uwi
       FROM well
     ),
     d AS (
       SELECT 
-        uwi                 AS id_d_uwi,
-        survey_id           AS id_d_survey_id,
-        source              AS id_d_source,
-        'actual'            AS id_d_kind,
+        uwi                   AS id_d_uwi,
+        survey_id             AS id_d_survey_id,
+        source                AS id_d_source,
+        'actual'              AS id_d_kind,
+        MAX(row_changed_date) AS max_row_changed_date,
         LIST(IFNULL(azimuth,              '${N}', CAST(azimuth AS VARCHAR)),                 '${D}' ORDER BY station_md)  AS d_azimuth,
         LIST(IFNULL(azimuth_ouom,         '${N}', azimuth_ouom),                             '${D}' ORDER BY station_md)  AS d_azimuth_ouom,
         LIST(IFNULL(ew_direction,         '${N}', ew_direction),                             '${D}' ORDER BY station_md)  AS d_ew_direction,
@@ -48,10 +49,11 @@ const defineSQL = (filter) => {
       GROUP BY uwi, survey_id, source
      UNION
       SELECT 
-        uwi                 AS id_d_uwi,
-        survey_id           AS id_d_survey_id,
-        source              AS id_d_source,
-        'proposed'          AS id_d_kind,
+        uwi                   AS id_d_uwi,
+        survey_id             AS id_d_survey_id,
+        source                AS id_d_source,
+        'proposed'            AS id_d_kind,
+        MAX(row_changed_date) AS max_row_changed_date,
         LIST(IFNULL(azimuth,              '${N}', CAST(azimuth AS VARCHAR)),                 '${D}' ORDER BY station_md)  AS d_azimuth,
         LIST(IFNULL(azimuth_ouom,         '${N}', azimuth_ouom),                             '${D}' ORDER BY station_md)  AS d_azimuth_ouom,
         LIST(IFNULL(ew_direction,         '${N}', ew_direction),                             '${D}' ORDER BY station_md)  AS d_ew_direction,
@@ -418,6 +420,9 @@ const xforms = {
   },
   id_d_kind: {
     ts_type: "string",
+  },
+  max_row_changed_date: {
+    ts_type: "date",
   },
   d_azimuth: {
     ts_type: "number",

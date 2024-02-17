@@ -33,15 +33,19 @@ const vault = {
 };
 
 serve(async (req) => {
-  let { asset, filter } = await req.json();
+  let { asset, filter, recency } = await req.json();
 
   const getDNA = vault[asset];
 
   if (!getDNA) {
-    console.error(`Probably Unknown asset: ${asset}`);
+    const error = `Unknown Petra asset: ${asset}`;
+    console.error(error);
+    return new Response(JSON.stringify(error), {
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
-  const data = getDNA(filter);
+  const data = getDNA(filter, recency);
 
   return new Response(JSON.stringify(data), {
     headers: { "Content-Type": "application/json" },

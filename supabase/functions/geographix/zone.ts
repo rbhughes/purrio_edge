@@ -1,5 +1,7 @@
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
+// 2023-10-18 well_zone_interval lacks source and zone_id in older schemas
+
 const defineSQL = (filter) => {
   const D = "|&|";
   const N = "purrNULL";
@@ -24,7 +26,7 @@ const defineSQL = (filter) => {
         mdss                       AS i_mdss,
         remark                     AS i_remark,
         row_changed_date           AS i_row_changed_date,
-        source                     AS i_source,
+        --source                     AS i_source,
         top_md                     AS i_top_md,
         top_tvd                    AS i_top_tvd,
         top_x                      AS i_top_x,
@@ -34,7 +36,7 @@ const defineSQL = (filter) => {
         uwi                        AS i_uwi,
         x                          AS i_x,
         y                          AS i_y,
-        zone_id                    AS i_zone_id,
+        --zone_id                    AS i_zone_id,
         zone_name                  AS i_zone_name
       FROM well_zone_interval
     ),
@@ -42,6 +44,7 @@ const defineSQL = (filter) => {
       SELECT 
         v.uwi                      AS j_uwi,
         v.zone_name                AS j_zone_name, 
+        MAX(v.row_changed_date)    AS max_row_changed_date,
         LIST(IFNULL(v.gx_remark,                '${N}', v.gx_remark),                                 '${D}' ORDER BY v.zattribute_name)  AS v_gx_remark,
         LIST(IFNULL(v.row_changed_date,         '${N}', v.row_changed_date),                          '${D}' ORDER BY v.zattribute_name)  AS v_row_changed_date,
         LIST(IFNULL(v.uwi,                      '${N}', v.uwi),                                       '${D}' ORDER BY v.zattribute_name)  AS v_uwi,
@@ -238,6 +241,10 @@ const xforms = {
   j_zone_name: {
     ts_type: "string",
   },
+  max_row_changed_date: {
+    ts_type: "date",
+  },
+
   v_gx_remark: {
     ts_type: "string",
     xform: "delimited_array_with_nulls",
@@ -377,7 +384,7 @@ const asset_id_keys = ["w_uwi", "i_zone_name"];
 
 const well_id_keys = ["w_uwi"];
 
-const default_chunk = 100; // 500
+const default_chunk = 100; // 200
 
 ///////////////////////////////////////////////////////////////////////////////
 

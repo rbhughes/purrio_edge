@@ -313,6 +313,7 @@ const defineSQL = (filter) => {
         source                     AS id_t_source,
         test_type                  AS id_t_test_type,
         run_number                 AS id_t_run_number,
+        MAX(row_changed_date)      AS max_row_changed_date,
         LIST(IFNULL(base_depth,                 '${N}', CAST(base_depth AS VARCHAR)),               '${D}' ORDER BY test_number)  AS t_base_depth,
         LIST(IFNULL(base_form,                  '${N}', CAST(base_form AS VARCHAR)),                '${D}' ORDER BY test_number)  AS t_base_form,
         LIST(IFNULL(bottom_choke_desc,          '${N}', CAST(bottom_choke_desc AS VARCHAR)),        '${D}' ORDER BY test_number)  AS t_bottom_choke_desc,
@@ -526,6 +527,10 @@ const xforms = {
   id_t_run_number: {
     ts_type: "string",
   },
+  max_row_changed_date: {
+    ts_type: "date",
+  },
+
   t_base_depth: {
     ts_type: "number",
     xform: "delimited_array_with_nulls",

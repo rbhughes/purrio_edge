@@ -84,7 +84,7 @@ const defineSQL = (filter) => {
       ${idForm} AS key
     FROM well w
     JOIN dirsurvdata d ON d.wsn = w.wsn
-    JOIN dirsurvdef def ON def.survrecid = d.survrecid
+    JOIN dirsurvdef f ON f.survrecid = d.survrecid
     ${where}
     `;
 
