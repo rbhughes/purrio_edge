@@ -2,13 +2,21 @@ import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
 // ignores well_dir_proposed_srvy_station.gx_dls
 
-const defineSQL = (filter) => {
+const defineSQL = (filter, recency) => {
   const D = "|&|";
   const N = "purrNULL";
 
   filter = filter ? filter : "";
+  const whereClause = ["WHERE 1=1"];
+  if (filter.trim().length > 0) {
+    whereClause.push(filter);
+  }
+  const where = whereClause.join(" AND ");
 
-  const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
+  let whereRecent = "";
+  if (recency > 0) {
+    whereRecent = `AND s.row_changed_date >= DATEADD(DAY, -${recency}, CURRENT DATE)`;
+  }
 
   let select = `SELECT * FROM (
     WITH w AS (
@@ -127,6 +135,7 @@ const defineSQL = (filter) => {
         s.uwi                      AS s_uwi
       FROM well_dir_srvy s
       WHERE s.uwi IN (SELECT DISTINCT(uwi) FROM well_dir_srvy_station)
+      ${whereRecent}
       UNION
       SELECT
         'proposed'                 AS s_kind,
@@ -175,6 +184,7 @@ const defineSQL = (filter) => {
         s.uwi                      AS s_uwi
       FROM well_dir_proposed_srvy s
       WHERE s.uwi IN (SELECT DISTINCT(uwi) FROM well_dir_proposed_srvy_station)
+      ${whereRecent}
     )
     SELECT
       w.*,
@@ -529,14 +539,18 @@ const default_chunk = 100; // 500
 
 ///////////////////////////////////////////////////////////////////////////////
 
-export const getAssetDNA = (filter) => {
+export const getAssetDNA = (filter, recency) => {
   return {
     default_chunk: default_chunk,
     asset_id_keys: asset_id_keys,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
-    sql: defineSQL(filter),
+    sql: defineSQL(filter, recency),
     well_id_keys: well_id_keys,
     xforms: xforms,
+    notes: [
+      "Yes, this will be quite slow.",
+      "The recency WHERE clause gets applied to WELL_DIR_SRVY and WELL_DIR_PROPOSED_SRVY.",
+    ],
   };
 };

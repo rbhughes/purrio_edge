@@ -12,7 +12,7 @@ import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 //     dip.append(struct.unpack('d',      ba[i+32: i+40])[0])
 //     azimuth.append(struct.unpack('d',  ba[i+40: i+48])[0])
 
-const defineSQL = (filter) => {
+const defineSQL = (filter, recency) => {
   filter = filter ? filter : "";
 
   const D = "|&|";
@@ -23,7 +23,16 @@ const defineSQL = (filter) => {
     .map((i) => `CAST(${i} AS VARCHAR(10))`)
     .join(` || '-' || `);
 
-  const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
+  const whereClause = ["WHERE 1=1"];
+
+  if (recency > 0) {
+    let now = Date.now() / (86400 * 1000) + 25569;
+    whereClause.push(`d.chgdate >= ${now - recency} AND d.chgdate < 1E30`);
+  }
+  if (filter.trim().length > 0) {
+    whereClause.push(filter);
+  }
+  const where = whereClause.join(" AND ");
 
   let select = `SELECT
     w.wsn          AS w_wsn,
@@ -344,14 +353,15 @@ const default_chunk = 100; // 1000
 
 ///////////////////////////////////////////////////////////////////////////////
 
-export const getAssetDNA = (filter) => {
+export const getAssetDNA = (filter, recency) => {
   return {
     asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
-    sql: defineSQL(filter),
+    sql: defineSQL(filter, recency),
     well_id_keys: well_id_keys,
     xforms: xforms,
+    notes: [],
   };
 };

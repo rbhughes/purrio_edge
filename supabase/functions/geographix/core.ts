@@ -7,21 +7,16 @@ const defineSQL = (filter, recency) => {
   const N = "purrNULL";
 
   filter = filter ? filter : "";
-
-  //const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
   const whereClause = ["WHERE 1=1"];
-
-  if (recency > 0) {
-    whereClause.push(
-      `c_row_changed_date >= DATEADD(DAY, -${recency}, CURRENT DATE)`
-    );
-  }
   if (filter.trim().length > 0) {
     whereClause.push(filter);
   }
   const where = whereClause.join(" AND ");
 
-  //  where = `WHERE c_row_changed_date >= DATEADD(DAY, -${recency}, CURRENT DATE)`
+  let whereRecent = "";
+  if (recency > 0) {
+    whereRecent = `WHERE row_changed_date >= DATEADD(DAY, -${recency}, CURRENT DATE)`;
+  }
 
   // let select = `SELECT * FROM (
   //   WITH w AS (
@@ -331,6 +326,7 @@ const defineSQL = (filter, recency) => {
         top_depth_ouom              AS c_top_depth_ouom,
         uwi                         AS c_uwi
       FROM well_core
+      ${whereRecent}
     ),
     s AS (
       SELECT

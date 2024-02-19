@@ -2,13 +2,21 @@ import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
 // 2023-10-18 well_zone_interval lacks source and zone_id in older schemas
 
-const defineSQL = (filter) => {
+const defineSQL = (filter, recency) => {
   const D = "|&|";
   const N = "purrNULL";
 
   filter = filter ? filter : "";
+  const whereClause = ["WHERE 1=1"];
+  if (filter.trim().length > 0) {
+    whereClause.push(filter);
+  }
+  const where = whereClause.join(" AND ");
 
-  const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
+  let whereRecent = "";
+  if (recency > 0) {
+    whereRecent = `WHERE row_changed_date >= DATEADD(DAY, -${recency}, CURRENT DATE)`;
+  }
 
   let select = `SELECT * FROM (
     WITH w AS (
@@ -85,6 +93,7 @@ const defineSQL = (filter) => {
         row_changed_date           AS z_row_changed_date,
         zone_name                  AS z_zone_name
       FROM gx_zone
+      ${whereRecent}
     )
   SELECT
     w.*,
@@ -388,14 +397,17 @@ const default_chunk = 100; // 200
 
 ///////////////////////////////////////////////////////////////////////////////
 
-export const getAssetDNA = (filter) => {
+export const getAssetDNA = (filter, recency) => {
   return {
     asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
-    sql: defineSQL(filter),
+    sql: defineSQL(filter, recency),
     well_id_keys: well_id_keys,
     xforms: xforms,
+    notes: [
+      "Using a recency date WHERE clause applies to parent GX_ZONE only.",
+    ],
   };
 };

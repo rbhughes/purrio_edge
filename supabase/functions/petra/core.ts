@@ -162,6 +162,9 @@ const xforms = {
   w_uwi: {
     ts_type: "string",
   },
+  w_chgdate: {
+    ts_type: "number",
+  },
 
   // CORES
 

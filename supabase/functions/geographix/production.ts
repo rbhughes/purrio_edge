@@ -1,12 +1,20 @@
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
-const defineSQL = (filter) => {
+const defineSQL = (filter, recency) => {
   const D = "|&|";
   const N = "purrNULL";
 
   filter = filter ? filter : "";
+  const whereClause = ["WHERE 1=1"];
+  if (filter.trim().length > 0) {
+    whereClause.push(filter);
+  }
+  const where = whereClause.join(" AND ");
 
-  const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
+  let whereRecent = "";
+  if (recency > 0) {
+    whereRecent = `WHERE row_changed_date >= DATEADD(DAY, -${recency}, CURRENT DATE)`;
+  }
 
   // let select = `SELECT * FROM (
   //   WITH w AS (
@@ -227,6 +235,7 @@ const defineSQL = (filter) => {
       volume_method                    AS p_volume_method,
       zone_id                          AS p_zone_id
       FROM well_cumulative_production
+      ${whereRecent}
     ),
     m AS (
       SELECT
@@ -822,14 +831,18 @@ const default_chunk = 100; // 1000
 
 ///////////////////////////////////////////////////////////////////////////////
 
-export const getAssetDNA = (filter) => {
+export const getAssetDNA = (filter, recency) => {
   return {
     asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
-    sql: defineSQL(filter),
+    sql: defineSQL(filter, recency),
     well_id_keys: well_id_keys,
     xforms: xforms,
+    notes: [
+      "Yes, this will be quite slow.",
+      "Many fields in GX_PDEN_VOL_SUM_BY_MONTH omitted to conserve memory.",
+    ],
   };
 };

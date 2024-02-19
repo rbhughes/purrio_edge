@@ -1,6 +1,6 @@
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
-const defineSQL = (filter) => {
+const defineSQL = (filter, recency) => {
   filter = filter ? filter : "";
 
   const where_clause_stub = "__pUrRwHeRe__";
@@ -9,11 +9,21 @@ const defineSQL = (filter) => {
     .map((i) => `CAST(${i} AS VARCHAR(10))`)
     .join(` || '-' || `);
 
-  const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
+  const whereClause = ["WHERE 1=1"];
+
+  if (recency > 0) {
+    let now = Date.now() / (86400 * 1000) + 25569;
+    whereClause.push(`w.chgdate >= ${now - recency} AND w.chgdate < 1E30`);
+  }
+  if (filter.trim().length > 0) {
+    whereClause.push(filter);
+  }
+  const where = whereClause.join(" AND ");
 
   let select = `SELECT
     w.wsn           AS w_wsn,
     w.uwi           AS w_uwi,
+    w.chgdate       AS w_chgdate,
 
     i.wsn           AS i_wsn,
     i.ign           AS i_ign,
@@ -116,6 +126,9 @@ const xforms = {
   w_uwi: {
     ts_type: "string",
   },
+  w_chgdate: {
+    ts_type: "number",
+  },
 
   // LOGIMAGE
 
@@ -168,14 +181,18 @@ const default_chunk = 100; // 1000
 
 ///////////////////////////////////////////////////////////////////////////////
 
-export const getAssetDNA = (filter) => {
+export const getAssetDNA = (filter, recency) => {
   return {
     asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
-    sql: defineSQL(filter),
+    sql: defineSQL(filter, recency),
     well_id_keys: well_id_keys,
     xforms: xforms,
+    notes: [
+      "Row changed dates are likely not implemented in LOGIMAGE table; using WELL instead.",
+      "TODO: get chgdate from LIC files? (would be extremely slow)",
+    ],
   };
 };

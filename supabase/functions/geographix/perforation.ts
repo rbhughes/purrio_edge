@@ -1,12 +1,20 @@
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
-const defineSQL = (filter) => {
+const defineSQL = (filter, recency) => {
   const D = "|&|";
   const N = "purrNULL";
 
   filter = filter ? filter : "";
+  const whereClause = ["WHERE 1=1"];
+  if (filter.trim().length > 0) {
+    whereClause.push(filter);
+  }
+  const where = whereClause.join(" AND ");
 
-  const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
+  let whereRecent = "";
+  if (recency > 0) {
+    whereRecent = `WHERE row_changed_date >= DATEADD(DAY, -${recency}, CURRENT DATE)`;
+  }
 
   let select = `SELECT * FROM (
     WITH w AS (
@@ -44,6 +52,7 @@ const defineSQL = (filter) => {
         LIST(IFNULL(top_form,                   '${N}', CAST(top_form AS VARCHAR)),                  '${D}' ORDER BY perforation_obs_no) AS p_top_form,
         LIST(IFNULL(uwi,                        '${N}', CAST(uwi AS VARCHAR)),                       '${D}' ORDER BY perforation_obs_no) AS p_uwi
       FROM well_perforation
+      ${whereRecent}
       GROUP BY uwi
     )
     SELECT
@@ -250,13 +259,13 @@ const default_chunk = 100; // 400
 
 ///////////////////////////////////////////////////////////////////////////////
 
-export const getAssetDNA = (filter) => {
+export const getAssetDNA = (filter, recency) => {
   return {
     asset_id_keys: asset_id_keys,
     default_chunk: default_chunk,
     prefixes: prefixes,
     serialized_xformer: serialize(xformer),
-    sql: defineSQL(filter),
+    sql: defineSQL(filter, recency),
     well_id_keys: well_id_keys,
     xforms: xforms,
   };
