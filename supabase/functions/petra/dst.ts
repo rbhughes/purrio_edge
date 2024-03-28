@@ -93,7 +93,8 @@ const aggregateFMTEST = (docs: Record<string, any>[]) => {
         id: inputDoc.id,
         well_id: inputDoc.well_id,
         repo_id: inputDoc.repo_id,
-        geo_type: inputDoc.geo_type,
+        repo_name: inputDoc.repo_name,
+        suite: inputDoc.suite,
         tag: inputDoc.tag,
         doc: {
           fmtest: [inputDoc.doc.fmtest],

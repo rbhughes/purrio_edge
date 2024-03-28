@@ -2,7 +2,8 @@
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { corsHeaders } from "../_shared/cors.ts";
+// import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 import { getAssetDNA as completion_dna } from "./completion.ts";
 import { getAssetDNA as core_dna } from "./core.ts";
@@ -32,7 +33,10 @@ const vault = {
   zone: zone_dna,
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
   let { asset, filter, recency } = await req.json();
 
   const getDNA = vault[asset];
@@ -41,14 +45,16 @@ serve(async (req) => {
     const error = `Unknown GeoGraphix asset: ${asset}`;
     console.error(error);
     return new Response(JSON.stringify(error), {
-      headers: { "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 400,
     });
   }
 
   const data = getDNA(filter, recency);
 
   return new Response(JSON.stringify(data), {
-    headers: { "Content-Type": "application/json" },
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    status: 200,
   });
 });
 

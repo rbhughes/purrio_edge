@@ -11,3 +11,7 @@ supabase functions deploy geographix --project-ref mjmxxfikiuvjfjljbhcy
 supabase functions delete geographix --project-ref mjmxxfikiuvjfjljbhcy
 
 supabase functions deploy petra --project-ref mjmxxfikiuvjfjljbhcy
+
+2024-03-05
+__ updated to Supbase CLI 1.148.6 via scoop
+__ it requires Docker Desktop to be running before you can deploy
