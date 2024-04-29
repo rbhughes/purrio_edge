@@ -37,7 +37,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
-  let { asset, filter, recency } = await req.json();
+  //let { asset, filter, recency } = await req.json();
+  let { asset } = await req.json();
 
   const getDNA = vault[asset];
 
@@ -50,7 +51,8 @@ Deno.serve(async (req) => {
     });
   }
 
-  const data = getDNA(filter, recency);
+  //const data = getDNA(filter, recency);
+  const data = getDNA();
 
   return new Response(JSON.stringify(data), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
