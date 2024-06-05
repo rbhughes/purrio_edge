@@ -1,157 +1,51 @@
-import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
-
-const defineSQL = (filter, recency) => {
-  filter = filter ? filter : "";
-
-  const D = "|&|";
-  const N = "purrNULL";
-  const where_clause_stub = "__pUrRwHeRe__";
-  const idCols = ["w.wsn"];
-  const idForm = idCols
-    .map((i) => `CAST(${i} AS VARCHAR(10))`)
-    .join(` || '-' || `);
-
-  //const where = filter.trim().length === 0 ? "" : `WHERE ${filter}`;
-  const whereClause = ["WHERE 1=1"];
-
-  if (recency > 0) {
-    let now = Date.now() / (86400 * 1000) + 25569;
-    whereClause.push(`w.chgdate >= ${now - recency} AND w.chgdate < 1E30`);
-  }
-  if (filter.trim().length > 0) {
-    whereClause.push(filter);
-  }
-  const where = whereClause.join(" AND ");
+const purr_where = "__purrWHERE__"
+const purr_null = "__purrNULL__"
+const purr_delimiter = "__purrDELIMITER__";
 
   let select = `SELECT
     w.wsn          AS w_wsn,
     w.uwi          AS w_uwi,
     w.chgdate      AS w_chgdate,
-
-    LIST(COALESCE(CAST(c.recid AS VARCHAR(10)),    '${N}'), '${D}') AS c_recid,
-    LIST(COALESCE(CAST(c.wsn AS VARCHAR(10)),      '${N}'), '${D}') AS c_wsn,
-    LIST(COALESCE(CAST(c.flags AS VARCHAR(10)),    '${N}'), '${D}') AS c_flags,
-    LIST(COALESCE(CAST(c.lithcode AS VARCHAR(10)), '${N}'), '${D}') AS c_lithcode,
-    LIST(COALESCE(CAST(c.date AS VARCHAR(10)),     '${N}'), '${D}') AS c_date,
-    LIST(COALESCE(CAST(c.top AS VARCHAR(10)),      '${N}'), '${D}') AS c_top,
-    LIST(COALESCE(CAST(c.base AS VARCHAR(10)),     '${N}'), '${D}') AS c_base,
-    LIST(COALESCE(CAST(c.recover AS VARCHAR(10)),  '${N}'), '${D}') AS c_recover,
-    LIST(COALESCE(c.type,                          '${N}'), '${D}') AS c_type,
-    LIST(COALESCE(c.qual,                          '${N}'), '${D}') AS c_qual,
-    LIST(COALESCE(c.fmname,                        '${N}'), '${D}') AS c_fmname,
-    LIST(COALESCE(c.desc,                          '${N}'), '${D}') AS c_desc,
-    LIST(COALESCE(CAST(c.remark AS VARCHAR(512)),  '${N}'), '${D}') AS c_remark
-
+    LIST(COALESCE(CAST(c.recid AS VARCHAR(10)),    '${purr_null}'), '${purr_delimiter}') AS c_recid,
+    LIST(COALESCE(CAST(c.wsn AS VARCHAR(10)),      '${purr_null}'), '${purr_delimiter}') AS c_wsn,
+    LIST(COALESCE(CAST(c.flags AS VARCHAR(10)),    '${purr_null}'), '${purr_delimiter}') AS c_flags,
+    LIST(COALESCE(CAST(c.lithcode AS VARCHAR(10)), '${purr_null}'), '${purr_delimiter}') AS c_lithcode,
+    LIST(COALESCE(CAST(c.date AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS c_date,
+    LIST(COALESCE(CAST(c.top AS VARCHAR(10)),      '${purr_null}'), '${purr_delimiter}') AS c_top,
+    LIST(COALESCE(CAST(c.base AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS c_base,
+    LIST(COALESCE(CAST(c.recover AS VARCHAR(10)),  '${purr_null}'), '${purr_delimiter}') AS c_recover,
+    LIST(COALESCE(c.type,                          '${purr_null}'), '${purr_delimiter}') AS c_type,
+    LIST(COALESCE(c.qual,                          '${purr_null}'), '${purr_delimiter}') AS c_qual,
+    LIST(COALESCE(c.fmname,                        '${purr_null}'), '${purr_delimiter}') AS c_fmname,
+    LIST(COALESCE(c.desc,                          '${purr_null}'), '${purr_delimiter}') AS c_desc,
+    LIST(COALESCE(CAST(c.remark AS VARCHAR(512)),  '${purr_null}'), '${purr_delimiter}') AS c_remark
   FROM well w
   JOIN cores c ON c.wsn = w.wsn
-  ${where_clause_stub}
+  ${purr_where}
   GROUP BY w.wsn
   `;
 
-  const order = `ORDER BY w_uwi`;
+const identifier_keys = ["w.wsn"];
+const idForm = identifier_keys
+    .map((i) => `CAST(${i} AS VARCHAR(10))`)
+    .join(` || '-' || `);
 
-  // NOTE: key, not keylist
-  const identifier = `
-    SELECT
-      DISTINCT(c.wsn) AS key
-    FROM well w
-    JOIN cores c ON w.wsn = c.wsn
-    ${where}`;
+// NOTE: key, not keylist
+// const identifier = `
+//   SELECT
+//     DISTINCT(c.wsn) AS key
+//   FROM well w
+//   JOIN cores c ON w.wsn = c.wsn
+//   ${purr_where}
+//   `;
 
-  return {
-    id_cols: idCols,
-    identifier: identifier,
-    order: order,
-    select: select,
-    where: where,
-    where_clause_stub: where_clause_stub,
-  };
-};
-
-const xformer = (args) => {
-  const D = "|&|";
-  const N = "purrNULL";
-
-  let { func, key, typ, arg, obj } = args;
-
-  const ensureType = (type: string, val: any) => {
-    if (val == null) {
-      return null;
-    } else if (type === "object") {
-      console.log("UNEXPECTED OBJECT TYPE! (needs xformer)", type);
-      console.log(val);
-      return null;
-    } else if (type === "string") {
-      return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-    } else if (type === "number") {
-      if (val.toString().replace(/\s/g, "") === "") {
-        return null;
-      }
-      let n = Number(val);
-      return isNaN(n) ? null : n;
-    } else if (type === "date") {
-      try {
-        return new Date(val).toISOString();
-      } catch (error) {
-        return null;
-      }
-    } else {
-      console.log("ENSURE TYPE SOMETHING ELSE (xformer)", type);
-      return "XFORM ME";
-    }
-  };
-
-  if (obj[key] == null) {
-    return null;
-  }
-
-  switch (func) {
-    case "delimited_array_with_nulls":
-      return (() => {
-        try {
-          return obj[key]
-            .split(D)
-            .map((v) => (v === N ? null : ensureType(typ, v)));
-        } catch (error) {
-          console.log("ERROR", error);
-          return;
-        }
-      })();
-    case "delimited_array_of_memo":
-      return (() => {
-        const localX = (v) => {
-          const buf = Buffer.from(v, "binary");
-          return ensureType("string", buf.toString("utf-8"));
-        };
-
-        try {
-          return obj[key].split(D).map((v) => (v === N ? null : localX(v)));
-        } catch (error) {
-          console.log("ERROR", error);
-          return;
-        }
-      })();
-    case "delimited_array_of_excel_dates":
-      return (() => {
-        const localX = (v) => {
-          if (v.toString().match(/1[eE]\+?30/i)) {
-            return null;
-          }
-          const d = new Date(Math.round((v - 25569) * 86400 * 1000));
-          return d.toISOString();
-        };
-
-        try {
-          return obj[key].split(D).map((v) => (v === N ? null : localX(v)));
-        } catch (error) {
-          console.log("ERROR", error);
-          return;
-        }
-      })();
-    default:
-      return ensureType(typ, obj[key]);
-  }
-};
+const identifier = `
+  SELECT
+    DISTINCT(${idForm}) AS key
+  FROM well w
+  JOIN cores c ON w.wsn = c.wsn
+  ${purr_where}
+  `;
 
 const xforms = {
   // WELL
@@ -164,6 +58,7 @@ const xforms = {
   },
   w_chgdate: {
     ts_type: "number",
+    xform: "excel_date"
   },
 
   // CORES
@@ -222,30 +117,35 @@ const xforms = {
   },
 };
 
+const asset_id_keys = ["w_uwi"];
+
+const default_chunk = 100; 
+
+const notes = [];
+
+const order = `ORDER BY w.uwi`;
+
 const prefixes = {
   w_: "well",
   c_: "cores",
 };
 
-const asset_id_keys = ["w_uwi"];
-
 const well_id_keys = ["w_uwi"];
 
-const default_chunk = 100; // 1000
-
-///////////////////////////////////////////////////////////////////////////////
-
-export const getAssetDNA = (filter, recency) => {
+export const getAssetDNA = () => {
   return {
-    asset_id_keys: asset_id_keys,
-    default_chunk: default_chunk,
-    prefixes: prefixes,
-    serialized_xformer: serialize(xformer),
-    sql: defineSQL(filter, recency),
-    well_id_keys: well_id_keys,
-    xforms: xforms,
-    notes: [
-      "Row changed dates are likely not implemented in CORES table; using WELL instead.",
-    ],
+    asset_id_keys,
+    default_chunk,
+    identifier,
+    identifier_keys,
+    notes,
+    order,
+    prefixes,
+    purr_delimiter,
+    purr_null,
+    purr_where,
+    select,
+    well_id_keys,
+    xforms,
   };
 };

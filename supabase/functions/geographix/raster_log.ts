@@ -1,176 +1,85 @@
-import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
+const purr_recent = "__purrRECENT__"
+const purr_null = "__purrNULL__"
+const purr_delimiter = "__purrDELIMITER__";
 
-const defineSQL = (filter, recency) => {
-  filter = filter ? filter : "";
-  const whereClause = ["WHERE 1=1"];
-  if (filter.trim().length > 0) {
-    whereClause.push(filter);
-  }
-  const where = whereClause.join(" AND ");
-
-  let whereRecent = "";
-  if (recency > 0) {
-    whereRecent = `WHERE row_changed_date >= DATEADD(DAY, -${recency}, CURRENT DATE)`;
-  }
-
-  let select = `SELECT * FROM (
-    WITH w AS (
-      SELECT
-        uwi                          AS w_uwi,
-        row_changed_date             AS w_row_changed_date
-      FROM well
-      ${whereRecent}
-    ),
-    v AS (
-      SELECT
-        bfile_data                   AS v_bfile_data,
-        blk_no                       AS v_blk_no,
-        blob_data                    AS v_blob_data,
-        blob_data                    AS v_blob_data_orig,
-        bytes_used                   AS v_bytes_used,
-        datatype                     AS v_datatype,
-        ow_rel_path                  AS v_ow_rel_path,
-        vec_storage_type             AS v_vec_storage_type,
-        vid                          AS v_vid
-      FROM log_depth_cal_vec
-    ),
-    r AS (
-      SELECT
-        log_section_index            AS r_log_section_index,
-        base_depth                   AS r_base_depth,
-        base_depth_ouom              AS r_base_depth_ouom,
-        bottom_left_x_pixel          AS r_bottom_left_x_pixel,
-        bottom_left_y_pixel          AS r_bottom_left_y_pixel,
-        bottom_right_x_pixel         AS r_bottom_right_x_pixel,
-        bottom_right_y_pixel         AS r_bottom_right_y_pixel,
-        create_date                  AS r_create_date,
-        create_user_id               AS r_create_user_id,
-        curve_bottom_left_x_pixel    AS r_curve_bottom_left_x_pixel,
-        curve_bottom_left_y_pixel    AS r_curve_bottom_left_y_pixel,
-        curve_bottom_right_x_pixel   AS r_curve_bottom_right_x_pixel,
-        curve_bottom_right_y_pixel   AS r_curve_bottom_right_y_pixel, 
-        curve_top_left_x_pixel       AS r_curve_top_left_x_pixel,
-        curve_top_left_y_pixel       AS r_curve_top_left_y_pixel,
-        curve_top_right_x_pixel      AS r_curve_top_right_x_pixel,
-        curve_top_right_y_pixel      AS r_curve_top_right_y_pixel,
-        header_bottom_left_x_pixel   AS r_header_bottom_left_x_pixel,
-        header_bottom_left_y_pixel   AS r_header_bottom_left_y_pixel,
-        header_bottom_right_x_pixel  AS r_header_bottom_right_x_pixel,
-        header_bottom_right_y_pixel  AS r_header_bottom_right_y_pixel, 
-        header_rotation              AS r_header_rotation,
-        header_top_left_x_pixel      AS r_header_top_left_x_pixel,
-        header_top_left_y_pixel      AS r_header_top_left_y_pixel,
-        header_top_right_x_pixel     AS r_header_top_right_x_pixel,
-        header_top_right_y_pixel     AS r_header_top_right_y_pixel,
-        log_depth_cal_vid            AS r_log_depth_cal_vid,
-        log_section_name             AS r_log_section_name,
-        num_depth_cal_pts            AS r_num_depth_cal_pts,
-        remark                       AS r_remark,
-        source_registration_filename AS r_source_registration_filename,
-        tif_file_identifier          AS r_tif_file_identifier,
-        tif_file_path                AS r_tif_file_path,
-        tif_filename                 AS r_tif_filename,
-        top_depth                    AS r_top_depth,
-        top_depth_ouom               AS r_top_depth_ouom,
-        top_left_x_pixel             AS r_top_left_x_pixel,
-        top_left_y_pixel             AS r_top_left_y_pixel,
-        top_right_x_pixel            AS r_top_right_x_pixel,
-        top_right_y_pixel            AS r_top_right_y_pixel,
-        update_date                  AS r_update_date,
-        update_user_id               AS r_update_user_id,
-        well_id                      AS r_well_id
-      FROM log_image_reg_log_section
-    )
+const select = `SELECT * FROM (
+  WITH w AS (
     SELECT
-      w.*,
-      v.*,
-      r.*
-    FROM w
-    JOIN r ON
-      r.r_well_id = w.w_uwi
-    JOIN v ON 
-      r.r_log_depth_cal_vid = v.v_vid
-    ) x`;
-
-  const order = `ORDER BY w_uwi, r_log_section_index`;
-
-  const count = `SELECT COUNT(*) AS count FROM ( ${select} ) c ${where}`;
-
-  return {
-    select: select,
-    count: count,
-    order: order,
-    where: where,
-  };
-};
-
-const xformer = (args) => {
-  let { func, key, typ, arg, obj } = args;
-
-  const ensureType = (type: string, val: any) => {
-    if (val == null) {
-      return null;
-    } else if (type === "object") {
-      console.log("UNEXPECTED OBJECT TYPE! (needs xformer)", type);
-      console.log(val);
-      return null;
-    } else if (type === "string") {
-      return val.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-    } else if (type === "number") {
-      if (val.toString().replace(/\s/g, "") === "") {
-        return null;
-      }
-      let n = Number(val);
-      return isNaN(n) ? null : n;
-    } else if (type === "date") {
-      try {
-        return new Date(val).toISOString();
-      } catch (error) {
-        return null;
-      }
-    } else {
-      console.log("ENSURE TYPE SOMETHING ELSE (xformer)", type);
-      return "XFORM ME";
-    }
-  };
-
-  if (obj[key] == null) {
-    return null;
-  }
-
-  switch (func) {
-    case "decode_depth_registration":
-      return (() => {
-        try {
-          const reg_points = [];
-          const buf = Buffer.from(obj[key], "binary");
-          for (let i = 12; i < buf.length; i += 28) {
-            let depth = buf.slice(i, i + 8).readDoubleLE();
-            let pixel = buf.slice(i + 12, i + 16).readInt32LE();
-            reg_points.push({
-              depth: depth,
-              pixel: pixel,
-            });
-          }
-          return reg_points;
-        } catch (error) {
-          console.log(`ERROR (${func})`, error);
-          return [];
-        }
-      })();
-    case "blob_to_hex":
-      return (() => {
-        try {
-          return Buffer.from(obj[key]).toString("hex");
-        } catch (error) {
-          console.log(`ERROR (${func})`, error);
-          return;
-        }
-      })();
-    default:
-      return ensureType(typ, obj[key]);
-  }
-};
+      uwi                          AS w_uwi,
+      row_changed_date             AS w_row_changed_date
+    FROM well
+    ${purr_recent}
+  ),
+  v AS (
+    SELECT
+      bfile_data                   AS v_bfile_data,
+      blk_no                       AS v_blk_no,
+      blob_data                    AS v_blob_data,
+      blob_data                    AS v_blob_data_orig,
+      bytes_used                   AS v_bytes_used,
+      datatype                     AS v_datatype,
+      ow_rel_path                  AS v_ow_rel_path,
+      vec_storage_type             AS v_vec_storage_type,
+      vid                          AS v_vid
+    FROM log_depth_cal_vec
+  ),
+  r AS (
+    SELECT
+      log_section_index            AS r_log_section_index,
+      base_depth                   AS r_base_depth,
+      base_depth_ouom              AS r_base_depth_ouom,
+      bottom_left_x_pixel          AS r_bottom_left_x_pixel,
+      bottom_left_y_pixel          AS r_bottom_left_y_pixel,
+      bottom_right_x_pixel         AS r_bottom_right_x_pixel,
+      bottom_right_y_pixel         AS r_bottom_right_y_pixel,
+      create_date                  AS r_create_date,
+      create_user_id               AS r_create_user_id,
+      curve_bottom_left_x_pixel    AS r_curve_bottom_left_x_pixel,
+      curve_bottom_left_y_pixel    AS r_curve_bottom_left_y_pixel,
+      curve_bottom_right_x_pixel   AS r_curve_bottom_right_x_pixel,
+      curve_bottom_right_y_pixel   AS r_curve_bottom_right_y_pixel, 
+      curve_top_left_x_pixel       AS r_curve_top_left_x_pixel,
+      curve_top_left_y_pixel       AS r_curve_top_left_y_pixel,
+      curve_top_right_x_pixel      AS r_curve_top_right_x_pixel,
+      curve_top_right_y_pixel      AS r_curve_top_right_y_pixel,
+      header_bottom_left_x_pixel   AS r_header_bottom_left_x_pixel,
+      header_bottom_left_y_pixel   AS r_header_bottom_left_y_pixel,
+      header_bottom_right_x_pixel  AS r_header_bottom_right_x_pixel,
+      header_bottom_right_y_pixel  AS r_header_bottom_right_y_pixel, 
+      header_rotation              AS r_header_rotation,
+      header_top_left_x_pixel      AS r_header_top_left_x_pixel,
+      header_top_left_y_pixel      AS r_header_top_left_y_pixel,
+      header_top_right_x_pixel     AS r_header_top_right_x_pixel,
+      header_top_right_y_pixel     AS r_header_top_right_y_pixel,
+      log_depth_cal_vid            AS r_log_depth_cal_vid,
+      log_section_name             AS r_log_section_name,
+      num_depth_cal_pts            AS r_num_depth_cal_pts,
+      remark                       AS r_remark,
+      source_registration_filename AS r_source_registration_filename,
+      tif_file_identifier          AS r_tif_file_identifier,
+      tif_file_path                AS r_tif_file_path,
+      tif_filename                 AS r_tif_filename,
+      top_depth                    AS r_top_depth,
+      top_depth_ouom               AS r_top_depth_ouom,
+      top_left_x_pixel             AS r_top_left_x_pixel,
+      top_left_y_pixel             AS r_top_left_y_pixel,
+      top_right_x_pixel            AS r_top_right_x_pixel,
+      top_right_y_pixel            AS r_top_right_y_pixel,
+      update_date                  AS r_update_date,
+      update_user_id               AS r_update_user_id,
+      well_id                      AS r_well_id
+    FROM log_image_reg_log_section
+  )
+  SELECT
+    w.*,
+    v.*,
+    r.*
+  FROM w
+  JOIN r ON
+    r.r_well_id = w.w_uwi
+  JOIN v ON 
+    r.r_log_depth_cal_vid = v.v_vid
+) x`;
 
 const xforms = {
   // WELL
@@ -347,32 +256,40 @@ const xforms = {
   },
 };
 
+const asset_id_keys = ["w_uwi", "r_log_section_index"];
+
+const default_chunk = 100; // 1000
+
+const notes = [
+  "Row changed dates are not implemented in LOG_IMAGE_REG_LOG_SECTION; using WELL instead.",
+  "TODO: get chgdate from LIC files? (would be extremely slow)",
+]
+
+const order = `ORDER BY w_uwi, r_log_section_index`;
+
 const prefixes = {
   w_: "well",
   v_: "log_depth_cal_vec",
   r_: "log_image_reg_log_section",
 };
 
-const asset_id_keys = ["w_uwi", "r_log_section_index"];
-
 const well_id_keys = ["w_uwi"];
 
-const default_chunk = 100; // 1000
 
 ///////////////////////////////////////////////////////////////////////////////
 
-export const getAssetDNA = (filter, recency) => {
+export const getAssetDNA = () => {
   return {
-    asset_id_keys: asset_id_keys,
-    default_chunk: default_chunk,
-    prefixes: prefixes,
-    serialized_xformer: serialize(xformer),
-    sql: defineSQL(filter, recency),
-    well_id_keys: well_id_keys,
-    xforms: xforms,
-    notes: [
-      "Row changed dates are not implemented in LOG_IMAGE_REG_LOG_SECTION; using WELL instead.",
-      "TODO: get chgdate from LIC files? (would be extremely slow)",
-    ],
+    asset_id_keys,
+    default_chunk,
+    notes,
+    order,
+    purr_delimiter,
+    purr_null,
+    purr_recent,
+    prefixes,
+    select,
+    well_id_keys,
+    xforms
   };
 };

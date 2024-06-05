@@ -1,3 +1,4 @@
+const purr_recent = "__purrRECENT__";
 
 const select = `SELECT * FROM (
   WITH w AS (
@@ -112,9 +113,9 @@ const select = `SELECT * FROM (
       well_name                   AS w_well_name,
       well_number                 AS w_well_number,
       whipstock_depth             AS w_whipstock_depth,
-      whipstock_depth_ouom        AS w_whipstock_depth_ouom,
+      whipstock_depth_ouom        AS w_whipstock_depth_ouom
     FROM well
-    __pUrRrEcEnT__
+    ${purr_recent}
   ),
   c AS (
     SELECT
@@ -608,7 +609,6 @@ const prefixes = {
 
 const well_id_keys = ["w_uwi"];
 
-const where_recent_slot = "__pUrRrEcEnT__";
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -620,8 +620,9 @@ export const getAssetDNA = () => {
     notes,
     order,
     prefixes,
+    purr_recent,
     select,
     well_id_keys,
-    where_recent_slot
+    xforms
   };
 };
