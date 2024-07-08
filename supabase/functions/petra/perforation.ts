@@ -1,3 +1,152 @@
+const purr_where = "__purrWHERE__"
+
+let select = `SELECT
+  w.wsn          AS w_wsn,
+  w.uwi          AS w_uwi,
+
+  p.recid        AS p_recid,
+  p.wsn          AS p_wsn,
+  p.flags        AS p_flags,
+  p.date         AS p_date,
+  p.enddate      AS p_enddate,
+  p.top          AS p_top,
+  p.base         AS p_base,
+  p.diameter     AS p_diameter,
+  p.numshots     AS p_numshots,
+  p.method       AS p_method,
+  p.comptype     AS p_comptype,
+  p.perftype     AS p_perftype,
+  p.remark       AS p_remark,
+  p.fmname       AS p_fmname,
+  p.chgdate      AS p_chgdate,
+  p.source       AS p_source
+
+FROM well w
+JOIN perfs p ON p.wsn = w.wsn
+${purr_where}
+`;
+
+const identifier_keys = ["w.wsn", "p.recid"];
+const idForm = identifier_keys
+  .map((i) => `CAST(${i} AS VARCHAR(10))`)
+  .join(` || '-' || `);
+
+const identifier = `
+  SELECT
+    LIST(${idForm}) AS keylist
+  FROM well w
+  JOIN perfs p ON p.wsn = w.wsn
+  ${purr_where}`;
+
+const xforms = {
+  // WELL
+
+  w_wsn: {
+    ts_type: "number",
+  },
+  w_uwi: {
+    ts_type: "string",
+  },
+
+  // PERFS
+
+  p_recid: {
+    ts_type: "number",
+  },
+  p_wsn: {
+    ts_type: "number",
+  },
+  p_flags: {
+    ts_type: "number",
+  },
+  p_date: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  p_enddate: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  p_top: {
+    ts_type: "number",
+  },
+  p_base: {
+    ts_type: "number",
+  },
+  p_diameter: {
+    ts_type: "number",
+  },
+  p_numshots: {
+    ts_type: "number",
+  },
+  p_method: {
+    ts_type: "string",
+  },
+  p_comptype: {
+    ts_type: "string",
+  },
+  p_perftype: {
+    ts_type: "string",
+  },
+  p_remark: {
+    xform: "memo_to_string",
+  },
+  p_fmname: {
+    ts_type: "string",
+  },
+  p_chgdate: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  p_source: {
+    ts_type: "string",
+  },
+};
+
+const asset_id_keys = ["w_uwi", "p_recid"];
+
+const default_chunk = 100;
+
+const notes = [
+  "Petra's concept of perfs is less 'overwrought' than ggx. The sensible thing \
+  is to consider common dates to signify a single completion event. The \
+  completion may even be indicated by the API number's last 4 digits: \
+  0001, 0002, 0003 signify recompletions \
+  maybe in 11th position like 0100 if it's a horizontal well"
+];
+
+const order = `ORDER BY w.uwi`;
+
+const post_process = ["aggregate_perfs"];
+
+const prefixes = {
+  w_: "well",
+  p_: "perfs",
+};
+
+const well_id_keys = ["w_uwi"];
+
+export const getAssetDNA = () => {
+  return {
+    asset_id_keys,
+    default_chunk,
+    identifier,
+    identifier_keys,
+    notes,
+    order,
+    post_process,
+    prefixes,
+    purr_where,
+    select,
+    well_id_keys,
+    xforms,
+  };
+};
+
+
+
+
+/*
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
 // Petra's concept of perfs is less "overwrought" than ggx. The sensible thing
@@ -255,3 +404,4 @@ export const getAssetDNA = (filter, recency) => {
     notes: [],
   };
 };
+*/

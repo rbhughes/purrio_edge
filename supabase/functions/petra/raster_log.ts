@@ -1,3 +1,130 @@
+const purr_where = "__purrWHERE__"
+
+let select = `SELECT
+  w.wsn           AS w_wsn,
+  w.uwi           AS w_uwi,
+  w.chgdate       AS w_chgdate,
+
+  i.wsn           AS i_wsn,
+  i.ign           AS i_ign,
+  i.flags         AS i_flags,
+  i.imagefilename AS i_imagefilename,
+  i.calibfilename AS i_calibfilename,
+
+  g.ign           AS g_ign,
+  g.flags         AS g_flags,
+  g.groupname     AS g_groupname,
+  g.desc          AS g_desc,
+  g.path          AS g_path
+
+FROM well w
+JOIN logimage i ON w.wsn = i.wsn
+LEFT OUTER JOIN logimgrp g ON i.ign = g.ign
+${purr_where}
+`;
+
+const identifier_keys = ["w.wsn", "i.ign"];
+const idForm = identifier_keys
+  .map((i) => `CAST(${i} AS VARCHAR(10))`)
+  .join(` || '-' || `);
+
+const identifier = `
+  SELECT
+    LIST(${idForm}) as keylist
+  FROM well w
+  JOIN logimage i ON w.wsn = i.wsn
+  LEFT OUTER JOIN logimgrp g ON i.ign = g.ign
+  ${purr_where}
+  `;
+
+const xforms = {
+  // WELL
+
+  w_wsn: {
+    ts_type: "number",
+  },
+  w_uwi: {
+    ts_type: "string",
+  },
+  w_chgdate: {
+    ts_type: "number",
+  },
+
+  // LOGIMAGE
+
+  i_wsn: {
+    ts_type: "number",
+  },
+  i_ign: {
+    ts_type: "number",
+  },
+  i_flags: {
+    ts_type: "number",
+  },
+  i_imagefilename: {
+    ts_type: "string",
+  },
+  i_calibfilename: {
+    ts_type: "string",
+  },
+
+  // LOGIMGRP
+
+  g_ign: {
+    ts_type: "number",
+  },
+  g_flags: {
+    ts_type: "number",
+  },
+  g_groupname: {
+    ts_type: "string",
+  },
+  g_desc: {
+    ts_type: "string",
+  },
+  g_path: {
+    ts_type: "string",
+  },
+};
+
+const asset_id_keys = ["w_uwi", "i_ign"];
+
+const default_chunk = 100;
+
+const notes = [
+  "Row changed dates are likely not implemented in LOGIMAGE table; using WELL instead.",
+  "TODO: get chgdate from LIC files? (would be extremely slow)",
+];
+
+const order = `ORDER BY w.uwi`;
+
+const prefixes = {
+  w_: "well",
+  i_: "logimage",
+  g_: "logimgrp",
+};
+
+const well_id_keys = ["w_uwi"];
+
+export const getAssetDNA = () => {
+  return {
+    asset_id_keys,
+    default_chunk,
+    identifier,
+    identifier_keys,
+    notes,
+    order,
+    prefixes,
+    purr_where,
+    select,
+    well_id_keys,
+    xforms,
+  };
+};
+
+
+
+/*
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
 const defineSQL = (filter, recency) => {
@@ -196,3 +323,5 @@ export const getAssetDNA = (filter, recency) => {
     ],
   };
 };
+
+*/

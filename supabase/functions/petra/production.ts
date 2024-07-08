@@ -1,3 +1,221 @@
+const purr_where = "__purrWHERE__"
+const purr_null = "__purrNULL__"
+const purr_delimiter = "__purrDELIMITER__";
+
+let select = `SELECT
+  w.wsn          AS w_wsn,
+  w.uwi          AS w_uwi,
+  w.chgdate      AS w_chgdate,
+
+  f.mid          AS f_mid,
+  f.name         AS f_name,
+  f.desc         AS f_desc,
+  f.units        AS f_units,
+  f.flags        AS f_flags,
+  f.nullvalue    AS f_nullvalue,
+  f.unitstype    AS f_unitstype,
+  f.chgdate      AS f_chgdate,
+
+  LIST(COALESCE(CAST(a.recid AS VARCHAR(10)),   '${purr_null}'), '${purr_delimiter}') AS a_recid,
+  LIST(COALESCE(CAST(a.wsn AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_wsn,
+  LIST(COALESCE(CAST(a.mid AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_mid,
+  LIST(COALESCE(CAST(a.year AS VARCHAR(10)),    '${purr_null}'), '${purr_delimiter}') AS a_year,
+  LIST(COALESCE(CAST(a.flags AS VARCHAR(10)),   '${purr_null}'), '${purr_delimiter}') AS a_flags,
+  LIST(COALESCE(CAST(a.cum AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_cum,
+  LIST(COALESCE(CAST(a.jan AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_jan,
+  LIST(COALESCE(CAST(a.feb AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_feb,
+  LIST(COALESCE(CAST(a.mar AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_mar,
+  LIST(COALESCE(CAST(a.apr AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_apr,
+  LIST(COALESCE(CAST(a.may AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_may,
+  LIST(COALESCE(CAST(a.jun AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_jun,
+  LIST(COALESCE(CAST(a.jul AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_jul,
+  LIST(COALESCE(CAST(a.aug AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_aug,
+  LIST(COALESCE(CAST(a.sep AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_sep,
+  LIST(COALESCE(CAST(a.oct AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_oct,
+  LIST(COALESCE(CAST(a.nov AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_nov,
+  LIST(COALESCE(CAST(a.dec AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_dec,
+  LIST(COALESCE(CAST(a.chgdate AS VARCHAR(10)), '${purr_null}'), '${purr_delimiter}') AS a_chgdate
+
+FROM mopddef f
+JOIN mopddata a ON a.mid = f.mid
+JOIN well w ON a.wsn = w.wsn
+${purr_where}
+GROUP BY w.wsn, f.mid
+`;
+
+const identifier_keys = ["w.wsn", "f.mid"];
+const idForm = identifier_keys
+    .map((i) => `CAST(${i} AS VARCHAR(10))`)
+    .join(` || '-' || `);
+
+const identifier = `
+  SELECT
+    ${idForm} AS key
+  FROM mopddef f
+  JOIN mopddata a ON a.mid = f.mid
+  JOIN well w ON a.wsn = w.wsn
+  ${purr_where}
+  GROUP BY key
+  `;
+
+const xforms = {
+  // WELL
+
+  w_wsn: {
+    ts_type: "number",
+  },
+  w_uwi: {
+    ts_type: "string",
+  },
+  w_chgdate: {
+    ts_type: "number",
+  },
+
+  // MOPDDEF
+
+  f_mid: {
+    ts_type: "number",
+  },
+  f_name: {
+    ts_type: "string",
+  },
+  f_desc: {
+    ts_type: "string",
+  },
+  f_units: {
+    ts_type: "string",
+  },
+  f_flags: {
+    ts_type: "number",
+  },
+  f_nullvalue: {
+    ts_type: "number",
+  },
+  f_unitstype: {
+    ts_type: "number",
+  },
+  f_chgdate: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+
+  // MOPDDATA
+
+  a_recid: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_wsn: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_mid: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_year: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_flags: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_cum: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_jan: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_feb: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_mar: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_apr: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_may: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_jun: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_jul: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_aug: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_sep: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_oct: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_nov: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_dec: {
+    ts_type: "number",
+    xform: "delimited_array_with_nulls",
+  },
+  a_chgdate: {
+    ts_type: "date",
+    xform: "delimited_array_of_excel_dates",
+  },
+};
+
+const asset_id_keys = ["w_uwi", "f_mid"];
+
+const default_chunk = 100;
+
+const notes = [];
+
+const order = `ORDER BY w.uwi`;
+
+const prefixes = {
+  w_: "well",
+  f_: "mopddef",
+  a_: "mopddata",
+};
+
+const well_id_keys = ["w_uwi"];
+
+export const getAssetDNA = () => {
+  return {
+    asset_id_keys,
+    default_chunk,
+    identifier,
+    identifier_keys,
+    notes,
+    order,
+    //post_process,
+    prefixes,
+    purr_delimiter,
+    purr_null,
+    purr_where,
+    select,
+    well_id_keys,
+    xforms,
+  };
+};
+
+
+/*
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
 const defineSQL = (filter, recency) => {
@@ -36,25 +254,25 @@ const defineSQL = (filter, recency) => {
     f.unitstype    AS f_unitstype,
     f.chgdate      AS f_chgdate,
 
-    LIST(COALESCE(CAST(a.recid AS VARCHAR(10)),   '${N}'), '${D}') AS a_recid,
-    LIST(COALESCE(CAST(a.wsn AS VARCHAR(10)),     '${N}'), '${D}') AS a_wsn,
-    LIST(COALESCE(CAST(a.mid AS VARCHAR(10)),     '${N}'), '${D}') AS a_mid,
-    LIST(COALESCE(CAST(a.year AS VARCHAR(10)),    '${N}'), '${D}') AS a_year,
-    LIST(COALESCE(CAST(a.flags AS VARCHAR(10)),   '${N}'), '${D}') AS a_flags,
-    LIST(COALESCE(CAST(a.cum AS VARCHAR(10)),     '${N}'), '${D}') AS a_cum,
-    LIST(COALESCE(CAST(a.jan AS VARCHAR(10)),     '${N}'), '${D}') AS a_jan,
-    LIST(COALESCE(CAST(a.feb AS VARCHAR(10)),     '${N}'), '${D}') AS a_feb,
-    LIST(COALESCE(CAST(a.mar AS VARCHAR(10)),     '${N}'), '${D}') AS a_mar,
-    LIST(COALESCE(CAST(a.apr AS VARCHAR(10)),     '${N}'), '${D}') AS a_apr,
-    LIST(COALESCE(CAST(a.may AS VARCHAR(10)),     '${N}'), '${D}') AS a_may,
-    LIST(COALESCE(CAST(a.jun AS VARCHAR(10)),     '${N}'), '${D}') AS a_jun,
-    LIST(COALESCE(CAST(a.jul AS VARCHAR(10)),     '${N}'), '${D}') AS a_jul,
-    LIST(COALESCE(CAST(a.aug AS VARCHAR(10)),     '${N}'), '${D}') AS a_aug,
-    LIST(COALESCE(CAST(a.sep AS VARCHAR(10)),     '${N}'), '${D}') AS a_sep,
-    LIST(COALESCE(CAST(a.oct AS VARCHAR(10)),     '${N}'), '${D}') AS a_oct,
-    LIST(COALESCE(CAST(a.nov AS VARCHAR(10)),     '${N}'), '${D}') AS a_nov,
-    LIST(COALESCE(CAST(a.dec AS VARCHAR(10)),     '${N}'), '${D}') AS a_dec,
-    LIST(COALESCE(CAST(a.chgdate AS VARCHAR(10)), '${N}'), '${D}') AS a_chgdate
+    LIST(COALESCE(CAST(a.recid AS VARCHAR(10)),   '${purr_null}'), '${purr_delimiter}') AS a_recid,
+    LIST(COALESCE(CAST(a.wsn AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_wsn,
+    LIST(COALESCE(CAST(a.mid AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_mid,
+    LIST(COALESCE(CAST(a.year AS VARCHAR(10)),    '${purr_null}'), '${purr_delimiter}') AS a_year,
+    LIST(COALESCE(CAST(a.flags AS VARCHAR(10)),   '${purr_null}'), '${purr_delimiter}') AS a_flags,
+    LIST(COALESCE(CAST(a.cum AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_cum,
+    LIST(COALESCE(CAST(a.jan AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_jan,
+    LIST(COALESCE(CAST(a.feb AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_feb,
+    LIST(COALESCE(CAST(a.mar AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_mar,
+    LIST(COALESCE(CAST(a.apr AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_apr,
+    LIST(COALESCE(CAST(a.may AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_may,
+    LIST(COALESCE(CAST(a.jun AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_jun,
+    LIST(COALESCE(CAST(a.jul AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_jul,
+    LIST(COALESCE(CAST(a.aug AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_aug,
+    LIST(COALESCE(CAST(a.sep AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_sep,
+    LIST(COALESCE(CAST(a.oct AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_oct,
+    LIST(COALESCE(CAST(a.nov AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_nov,
+    LIST(COALESCE(CAST(a.dec AS VARCHAR(10)),     '${purr_null}'), '${purr_delimiter}') AS a_dec,
+    LIST(COALESCE(CAST(a.chgdate AS VARCHAR(10)), '${purr_null}'), '${purr_delimiter}') AS a_chgdate
 
   FROM mopddef f
   JOIN mopddata a ON a.mid = f.mid
@@ -320,3 +538,4 @@ export const getAssetDNA = (filter, recency) => {
     ],
   };
 };
+*/

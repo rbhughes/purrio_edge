@@ -1,3 +1,264 @@
+const purr_where = "__purrWHERE__"
+
+let select = `SELECT
+  w.wsn          AS w_wsn,
+  w.uwi          AS w_uwi,
+
+  a.ldsn         AS a_ldsn,
+  a.wsn          AS a_wsn,
+  a.lsn          AS a_lsn,
+  a.flags        AS a_flags,
+  a.units        AS a_units,
+  a.elev_zid     AS a_elev_zid,
+  a.elev_fid     AS a_elev_fid,
+  a.numpts       AS a_numpts,
+  a.start        AS a_start,
+  a.stop         AS a_stop,
+  a.step         AS a_step,
+  a.minval       AS a_minval,
+  a.maxval       AS a_maxval,
+  a.mean         AS a_mean,
+  a.stddev       AS a_stddev,
+  a.nullval      AS a_nullval,
+  a.source       AS a_source,
+  a.digits       AS a_digits,
+  a.remarks      AS a_remarks,
+
+  f.lsn          AS f_lsn,
+  f.logname      AS f_logname,
+  f.desc         AS f_desc,
+  f.units        AS f_units,
+  f.servid       AS f_servid,
+  f.remarks      AS f_remarks,
+  f.flags        AS f_flags,
+
+  x.ldsn         AS x_ldsn,
+  x.wsn          AS x_wsn,
+  x.lsn          AS x_lsn,
+  x.flags        AS x_flags,
+  x.adddate      AS x_adddate,
+  x.chgdate      AS x_chgdate,
+  x.lasid        AS x_lasid,
+
+  s.lasid        AS s_lasid,
+  s.wsn          AS s_wsn,
+  s.flags        AS s_flags,
+  s.adddate      AS s_adddate,
+  s.chgdate      AS s_chgdate,
+  s.hdrsize      AS s_hdrsize,
+  s.lashdr       AS s_lashdr
+
+FROM well w
+JOIN logdata a ON w.wsn = a.wsn
+JOIN logdef f ON a.lsn = f.lsn
+JOIN logdatax x ON a.wsn = x.wsn AND a.lsn = x.lsn AND a.ldsn = x.ldsn
+LEFT OUTER JOIN loglas s ON x.lasid = s.lasid AND w.wsn = s.wsn
+${purr_where}
+`;
+
+const identifier_keys = ["w.wsn", "a.ldsn"];
+const idForm = identifier_keys
+    .map((i) => `CAST(${i} AS VARCHAR(10))`)
+    .join(` || '-' || `);
+
+const identifier = `
+  SELECT
+    LIST(${idForm}) as keylist
+  FROM well w
+  JOIN logdata a ON w.wsn = a.wsn
+  JOIN logdef f ON a.lsn = f.lsn
+  JOIN logdatax x ON a.wsn = x.wsn AND a.lsn = x.lsn AND a.ldsn = x.ldsn
+  LEFT OUTER JOIN loglas s ON x.lasid = s.lasid AND w.wsn = s.wsn
+  ${purr_where}
+  `;
+
+const xforms = {
+  // WELL
+
+  w_wsn: {
+    ts_type: "number",
+  },
+  w_uwi: {
+    ts_type: "string",
+  },
+
+  // LOGDATA
+
+  a_ldsn: {
+    ts_type: "number",
+  },
+  a_wsn: {
+    ts_type: "number",
+  },
+  a_lsn: {
+    ts_type: "number",
+  },
+  a_flags: {
+    ts_type: "number",
+  },
+  a_units: {
+    ts_type: "number",
+  },
+  a_elev_zid: {
+    ts_type: "number",
+  },
+  a_elev_fid: {
+    ts_type: "number",
+  },
+  a_numpts: {
+    ts_type: "number",
+  },
+  a_start: {
+    ts_type: "number",
+  },
+  a_stop: {
+    ts_type: "number",
+  },
+  a_step: {
+    ts_type: "number",
+  },
+  a_minval: {
+    ts_type: "number",
+  },
+  a_maxval: {
+    ts_type: "number",
+  },
+  a_mean: {
+    ts_type: "number",
+  },
+  a_stddev: {
+    ts_type: "number",
+  },
+  a_nullval: {
+    ts_type: "number",
+  },
+  a_source: {
+    ts_type: "string",
+  },
+  a_digits: {
+    ts_type: "string",
+    xform: "logdata_digits",
+  },
+  a_remarks: {
+    ts_type: "string",
+    xform: "memo_to_string",
+  },
+
+  // LOGDEF
+
+  f_lsn: {
+    ts_type: "number",
+  },
+  f_logname: {
+    ts_type: "string",
+  },
+  f_desc: {
+    ts_type: "string",
+  },
+  f_units: {
+    ts_type: "string",
+  },
+  f_servid: {
+    ts_type: "number",
+  },
+  f_remarks: {
+    ts_type: "string",
+  },
+  f_flags: {
+    ts_type: "number",
+  },
+
+  // LOGDATAX
+
+  x_ldsn: {
+    ts_type: "number",
+  },
+  x_wsn: {
+    ts_type: "number",
+  },
+  x_lsn: {
+    ts_type: "number",
+  },
+  x_flags: {
+    ts_type: "number",
+  },
+  x_adddate: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  x_chgdate: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  x_lasid: {
+    ts_type: "number",
+  },
+
+  // LOGLAS
+
+  s_lasid: {
+    ts_type: "number",
+  },
+  s_wsn: {
+    ts_type: "number",
+  },
+  s_flags: {
+    ts_type: "number",
+  },
+  s_adddate: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  s_chgdate: {
+    ts_type: "date",
+    xform: "excel_date",
+  },
+  s_hdrsize: {
+    ts_type: "number",
+  },
+  s_lashdr: {
+    ts_type: "string",
+    xform: "loglas_lashdr",
+  },
+};
+
+const asset_id_keys = ["w_uwi", "a_ldsn"];
+
+const default_chunk = 100;
+
+const notes = [];
+
+const order = `ORDER BY w.uwi, a.ldsn`;
+
+const prefixes = {
+  w_: "well",
+  a_: "logdata",
+  f_: "logdef",
+  x_: "logdatax",
+  s_: "loglas",
+};
+
+const well_id_keys = ["w_uwi"];
+
+export const getAssetDNA = () => {
+  return {
+    asset_id_keys,
+    default_chunk,
+    identifier,
+    identifier_keys,
+    notes,
+    order,
+    prefixes,
+    purr_where,
+    select,
+    well_id_keys,
+    xforms,
+  };
+};
+
+
+/*
+
 import { serialize } from "https://deno.land/x/serialize_javascript/mod.ts";
 
 const defineSQL = (filter, recency) => {
@@ -366,3 +627,5 @@ export const getAssetDNA = (filter, recency) => {
     notes: [],
   };
 };
+
+*/
